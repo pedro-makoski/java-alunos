@@ -1,5 +1,5 @@
-create table user (
-    id    uuid unique not null,
+create table users (
+    id  uuid not null,
     email varchar(100) unique not null,
     senha text not null,
     data_nascimento date,
@@ -15,7 +15,7 @@ create table user (
 );
 
 create table turma (
-    id uuid unique not null,
+    id uuid not null,
     nome varchar(250),
     tipo varchar(20),
     tamanho_maximo int,
@@ -30,7 +30,7 @@ create table turma (
 );
 
 create table aluno (
-    id uuid unique not null,
+    id uuid not null,
     nome varchar(250),
     data_nascimento date,
     nome_pai varchar(250),
@@ -47,7 +47,7 @@ create table aluno (
 );
 
 create table periodo (
-    id  uuid unique not null,
+    id  uuid not null,
     tipo varchar(30),
     inicio date,
     fim date,
@@ -73,11 +73,11 @@ create table turma_periodo (
 
     primary key (turma_id, periodo_id),
     constraint turma_periodo_ids_turma foreign key (turma_id) references turma(id),
-    constraint turma_periodo_ids_periodo foreign key (periodo_id) references periodo(id),
+    constraint turma_periodo_ids_periodo foreign key (periodo_id) references periodo(id)
 );
 
 create table professor (
-    id uuid unique not null,
+    id uuid not null,
     email varchar(250) unique,
     senha text,
     nome varchar(250),
@@ -89,11 +89,11 @@ create table professor (
     deleted_at TIMESTAMP WITH TIME ZONE,
 
     primary key (id),
-    constraint dono_professor foreign key (dono) references user(id)''
+    constraint dono_professor foreign key (dono) references users(id)
 );
 
 create table materia (
-    id uuid unique not null,
+    id uuid not null,
     nome varchar(250),
     professor uuid,
     turma uuid,
