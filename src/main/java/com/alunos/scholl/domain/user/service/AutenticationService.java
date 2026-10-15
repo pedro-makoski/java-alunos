@@ -6,7 +6,6 @@ import com.alunos.scholl.domain.user.dtos.response.LoginResponse;
 import com.alunos.scholl.domain.user.exceptions.UserException;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.repositories.UserRepository;
-import com.alunos.scholl.infra.security.SecurityFilter;
 import com.alunos.scholl.infra.security.TokenService;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -21,7 +20,6 @@ import org.springframework.security.core.userdetails.UsernameNotFoundException;
 import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.UUID;
 
@@ -74,7 +72,7 @@ public class AutenticationService implements UserDetailsService {
     private ResponseEntity<LoginResponse> autenticateUser(User user) {
         var jwt = tokenService.gerarToken(user);
 
-        ResponseCookie responseCookie = ResponseCookie.from(SecurityFilter.KEY_COOKIE_JWT, jwt)
+        ResponseCookie responseCookie = ResponseCookie.from(GetUserOnRequest.KEY_COOKIE_JWT, jwt)
                 .httpOnly(true)
                 .path("/")
                 .maxAge(7 * 24 * 60 * 60)
