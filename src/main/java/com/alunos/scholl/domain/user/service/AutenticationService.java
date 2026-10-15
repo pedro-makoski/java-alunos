@@ -1,5 +1,6 @@
 package com.alunos.scholl.domain.user.service;
 
+import com.alunos.scholl.domain.user.dtos.request.CreateAccountRequest;
 import com.alunos.scholl.domain.user.dtos.request.LoginRequest;
 import com.alunos.scholl.domain.user.dtos.response.LoginResponse;
 import com.alunos.scholl.domain.user.exceptions.UserException;
@@ -17,12 +18,15 @@ import org.springframework.security.authentication.UsernamePasswordAuthenticatio
 import org.springframework.security.core.userdetails.UserDetails;
 import org.springframework.security.core.userdetails.UserDetailsService;
 import org.springframework.security.core.userdetails.UsernameNotFoundException;
+import org.springframework.security.crypto.password.PasswordEncoder;
 import org.springframework.stereotype.Service;
+import org.springframework.validation.annotation.Validated;
 import org.springframework.web.bind.annotation.RequestBody;
 
 import java.util.UUID;
 
 @Service
+@Validated
 public class AutenticationService implements UserDetailsService {
 
     @Autowired
@@ -34,20 +38,41 @@ public class AutenticationService implements UserDetailsService {
     @Autowired
     private TokenService tokenService;
 
+    @Autowired
+    private PasswordEncoder passwordEncoder;
+
     @Override
     public UserDetails loadUserByUsername(String username) throws UsernameNotFoundException {
         return userRepository.findById(UUID.fromString(username))
                     .orElseThrow(() -> new RuntimeException("Usuário não encontrado"));
     }
 
-    public ResponseEntity<LoginResponse> doLogin(LoginRequest loginRequest) {
+    public ResponseEntity<LoginResponse> doLogin(@Valid LoginRequest loginRequest) {
         var user = userRepository.findByEmail(loginRequest.email())
                 .orElseThrow(UserException::new);
 
         var token = new UsernamePasswordAuthenticationToken(user.getId(), user.getPassword());
         var autentication = manager.authenticate(token);
 
-        var jwt = tokenService.gerarToken((User) autentication.getPrincipal());
+        return autenticateUser((User) autentication.getPrincipal());
+    }
+
+    public ResponseEntity<LoginResponse> createAccount(@Valid CreateAccountRequest createAccountRequest) {
+        var user = User.builder()
+                .nome(createAccountRequest.nome())
+                .dataNascimento(createAccountRequest.dataNascimento())
+                .sobrenome(createAccountRequest.sobrenome())
+                .nome(createAccountRequest.nome())
+                .senha(passwordEncoder.encode(createAccountRequest.senha()))
+                .build();
+
+        userRepository.save(user);
+
+        return autenticateUser(user);
+    }
+
+    private ResponseEntity<LoginResponse> autenticateUser(User user) {
+        var jwt = tokenService.gerarToken(user);
 
         ResponseCookie responseCookie = ResponseCookie.from(SecurityFilter.KEY_COOKIE_JWT, jwt)
                 .httpOnly(true)
