@@ -43,7 +43,9 @@ public class SecurityFilter extends OncePerRequestFilter {
         filterChain.doFilter(request, response);
     }
 
+    public static String KEY_COOKIE_JWT = "jwt-login";
+
     private String getJWTToken(HttpServletRequest request) {
-        return SearchForCookie.obterCookieHttpOnly(request, "jwt-login");
+        return SearchForCookie.obterCookieHttpOnly(request, KEY_COOKIE_JWT);
     }
 }
