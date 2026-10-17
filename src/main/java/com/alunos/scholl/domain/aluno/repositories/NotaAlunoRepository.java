@@ -4,6 +4,9 @@ import com.alunos.scholl.domain.aluno.model.NotaAluno;
 import com.alunos.scholl.domain.aluno.model.NotaAlunoId;
 import org.springframework.data.jpa.repository.JpaRepository;
 
-public interface NotaAlunoRepository extends JpaRepository<NotaAluno, NotaAlunoId> {
+import java.util.List;
+import java.util.UUID;
 
+public interface NotaAlunoRepository extends JpaRepository<NotaAluno, NotaAlunoId> {
+    List<NotaAluno> findByNotaAlunoIdAluno(UUID alunoId);
 }
