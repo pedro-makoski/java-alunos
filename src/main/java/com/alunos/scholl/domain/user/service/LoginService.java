@@ -45,6 +45,10 @@ public class LoginService {
     }
 
     public ResponseEntity<LoginResponse> createAccount(@Valid CreateAccountRequest createAccountRequest) {
+        return autenticateUser(this.createUser(createAccountRequest));
+    }
+
+    public User createUser(@Valid CreateAccountRequest createAccountRequest) {
         var user = User.builder()
                 .nome(createAccountRequest.nome())
                 .dataNascimento(createAccountRequest.dataNascimento())
@@ -53,9 +57,7 @@ public class LoginService {
                 .senha(passwordEncoder.encode(createAccountRequest.senha()))
                 .build();
 
-        userRepository.save(user);
-
-        return autenticateUser(user);
+        return userRepository.save(user);
     }
 
     private ResponseEntity<LoginResponse> autenticateUser(User user) {
