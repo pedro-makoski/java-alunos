@@ -72,6 +72,24 @@ public class AlunoService {
         return new AlunoSample(getAlunoById(id, user));
     }
 
+    public ResponseEntity<?> updateAlunoTurma(
+            UUID alunoId,
+            UUID turmaId,
+            HttpServletRequest httpServletRequest
+    ) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var aluno = getAlunoById(alunoId, user);
+        var turma = turmaService.getTurma(turmaId, user);
+
+        aluno.setTurma(turma);
+
+        alunoRepository.save(aluno);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
     public Aluno getAlunoById(UUID id, User user) {
         var aluno = alunoRepository.findById(id)
                 .orElseThrow(AlunoNotFound::new);
