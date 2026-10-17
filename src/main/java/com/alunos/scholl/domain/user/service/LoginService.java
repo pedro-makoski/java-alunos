@@ -60,6 +60,18 @@ public class LoginService {
         return userRepository.save(user);
     }
 
+    public ResponseEntity<?> deslogin() {
+        ResponseCookie responseCookie = ResponseCookie.from(GetUserOnRequest.KEY_COOKIE_JWT, "")
+                .httpOnly(true)
+                .path("/")
+                .maxAge(0)
+                .build();
+
+        return ResponseEntity.ok()
+                .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
+                .body(new LoginResponse("Usuário deslogado com sucesso!"));
+    }
+
     private ResponseEntity<LoginResponse> autenticateUser(User user) {
         var jwt = tokenService.gerarToken(user);
 

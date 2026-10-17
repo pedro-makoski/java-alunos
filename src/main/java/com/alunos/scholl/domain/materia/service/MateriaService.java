@@ -66,6 +66,25 @@ public class MateriaService {
                 .body(new CreateMateriaResponse(result.getId()));
     }
 
+    public ResponseEntity<?> changeTurmaInMateria(
+            UUID idTurma,
+            UUID idMateria,
+            HttpServletRequest httpServletRequest
+    ) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+
+        var materia = getByMateriaId(idMateria, user);
+        var turma = turmaService.getTurma(idTurma, user);
+
+        materia.setTurma(turma);
+
+        materiaRepository.save(materia);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
     public Page<MateriaSample> findMyMaterias(
             int pageNumber,
             HttpServletRequest httpServletRequest
@@ -104,5 +123,12 @@ public class MateriaService {
         }
 
         return materia;
+    }
+
+    public Page<MateriaSample> getMateriasOfAluno(
+            HttpServletRequest httpServletRequest,
+            User user
+    ) {
+        return materiaRepository.findBy
     }
 }
