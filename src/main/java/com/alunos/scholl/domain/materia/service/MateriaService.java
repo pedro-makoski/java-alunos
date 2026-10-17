@@ -1,5 +1,6 @@
 package com.alunos.scholl.domain.materia.service;
 
+import com.alunos.scholl.domain.aluno.service.AlunoService;
 import com.alunos.scholl.domain.materia.dto.request.CreateMateriaRequest;
 import com.alunos.scholl.domain.materia.dto.response.CreateMateriaResponse;
 import com.alunos.scholl.domain.materia.dto.response.MateriaSample;
@@ -123,12 +124,5 @@ public class MateriaService {
         }
 
         return materia;
-    }
-
-    public Page<MateriaSample> getMateriasOfAluno(
-            HttpServletRequest httpServletRequest,
-            User user
-    ) {
-        return materiaRepository.findBy
     }
 }

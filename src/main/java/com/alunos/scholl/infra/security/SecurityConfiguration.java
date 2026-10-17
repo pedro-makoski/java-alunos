@@ -31,12 +31,12 @@ public class SecurityConfiguration {
                              "/change-aluno-turma", "/create-periodo", "/add-turma-in-periodo",
                              "/add-professor", "/create-materia", "/add-periodo-in-materia",
                              "/add-turma-in-materia", "/turma/**", "/aluno/**", "/periodo/**",
-                             "/materia/**")
+                             "/materia/**", "/get-materias-of-aluno/**")
                                 .hasAuthority(Authorities.DONO.name)
                      .requestMatchers(
                             "/deslogin", "/my-turmas", "/get-alunos",
-                             "/get-periodos", "/get-materias", "/get-materias-of-aluno/**",
-                             "/get-aluno-infos", "/get-my-materias", "/get-materia-infos",
+                             "/get-periodos", "/get-materias",
+                             "/get-aluno-infos", "/get-materia-infos",
                              "/update-materia-infos"
                      ).authenticated()
                 )
