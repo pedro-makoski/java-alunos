@@ -5,10 +5,8 @@ import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
 
-import java.util.UUID;
-
 @Embeddable
-public class PeridoMateriaId {
+public class PeriodoMateriaId {
     @ManyToOne
     @JoinColumn(name = "materia_id")
     Materia materia;
@@ -16,4 +14,9 @@ public class PeridoMateriaId {
     @ManyToOne
     @JoinColumn(name = "periodo_id")
     Periodo periodo;
+
+    public PeriodoMateriaId(Materia materia, Periodo periodo) {
+        this.materia = materia;
+        this.periodo = periodo;
+    }
 }
