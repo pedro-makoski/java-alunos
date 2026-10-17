@@ -5,13 +5,17 @@ import com.alunos.scholl.domain.professor.dto.response.CreateProfessorResponse;
 import com.alunos.scholl.domain.professor.model.Professor;
 import com.alunos.scholl.domain.professor.repositories.ProfessorRepository;
 import com.alunos.scholl.domain.user.dtos.request.CreateAccountRequest;
+import com.alunos.scholl.domain.professor.dto.response.SampleProfessor;
 import com.alunos.scholl.domain.user.repositories.UserRepository;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import com.alunos.scholl.domain.user.service.LoginService;
+import com.alunos.scholl.infra.Constants;
 import com.alunos.scholl.infra.utils.URIGeneratorOfBaseAndId;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -52,9 +56,22 @@ public class ProfessorService {
 
         newUser.setProfessor(professorResponse);
 
+        userRepository.save(newUser);
+
         return ResponseEntity
                 .created(URIGeneratorOfBaseAndId.realize("/professor/{id}",
                         professorResponse.getId()))
                 .body(new CreateProfessorResponse(professorResponse.getId()));
+    }
+
+    public Page<SampleProfessor> findMyProfessor(
+            int pageNumber,
+            HttpServletRequest httpServletRequest
+    ) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+
+        return professorRepository
+                .findAllByDonoId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                .map(SampleProfessor::new);
     }
 }
