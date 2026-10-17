@@ -3,10 +3,13 @@ package com.alunos.scholl.domain.turma.service;
 import com.alunos.scholl.domain.turma.dto.request.CreateTurmaRequest;
 import com.alunos.scholl.domain.turma.dto.response.CreateTurmaResponse;
 import com.alunos.scholl.domain.turma.dto.response.SampleTurma;
+import com.alunos.scholl.domain.turma.exceptions.TurmaNotFound;
 import com.alunos.scholl.domain.turma.model.Turma;
 import com.alunos.scholl.domain.turma.repositories.TurmaRepository;
+import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import com.alunos.scholl.infra.Constants;
+import com.alunos.scholl.infra.exceptions.YouDontHavePermission;
 import com.alunos.scholl.infra.utils.URIGeneratorOfBaseAndId;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -19,6 +22,7 @@ import org.springframework.validation.annotation.Validated;
 import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
+import java.util.UUID;
 
 @Service
 @Validated
@@ -61,6 +65,23 @@ public class TurmaService {
         return turmaRepository
                 .findAllByDonoId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
                 .map(SampleTurma::new);
+    }
+
+    public SampleTurma getAlunoById(UUID id, HttpServletRequest request) {
+        var user = getUserOnRequest.realizeWithThrow(request);
+
+        return new SampleTurma(getTurma(id, user));
+    }
+
+    public Turma getTurma(UUID idTurma, User user) {
+        var turma = turmaRepository.findById(idTurma)
+                .orElseThrow(TurmaNotFound::new);
+
+        if(!turma.getDono().getId().equals(user.getId())) {
+            throw new YouDontHavePermission();
+        }
+
+        return turma;
     }
 
     private URI getUriOfTurma(Turma turma) {
