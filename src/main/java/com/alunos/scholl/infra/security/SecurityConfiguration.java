@@ -30,7 +30,7 @@ public class SecurityConfiguration {
                              "/create-turma", "/create-aluno", "/update-aluno-info",
                              "/change-aluno-turma", "/create-periodo", "/add-turma-in-periodo",
                              "/add-professor", "/create-materia", "/add-periodo-in-materia",
-                             "/add-turma-in-materia", "/turma/**", "/aluno/**")
+                             "/add-turma-in-materia", "/turma/**", "/aluno/**", "/periodo/**")
                                 .hasAuthority(Authorities.DONO.name)
                      .requestMatchers(
                             "/deslogin", "/my-turmas", "/get-alunos",

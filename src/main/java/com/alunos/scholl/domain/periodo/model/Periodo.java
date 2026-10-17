@@ -1,10 +1,9 @@
 package com.alunos.scholl.domain.periodo.model;
 
 import com.alunos.scholl.domain.BaseEntity;
+import com.alunos.scholl.domain.user.model.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.time.LocalDate;
 import java.util.Date;
@@ -14,6 +13,8 @@ import java.util.UUID;
 @NoArgsConstructor
 @Getter
 @Setter
+@AllArgsConstructor
+@Builder
 public class Periodo extends BaseEntity {
 
     @Id
@@ -25,4 +26,8 @@ public class Periodo extends BaseEntity {
 
     LocalDate inicio;
     LocalDate fim;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dono")
+    User dono;
 }
