@@ -1,5 +1,6 @@
 package com.alunos.scholl.domain.materia.dto.response;
 
+import com.alunos.scholl.domain.materia.model.Materia;
 import com.alunos.scholl.domain.professor.dto.response.SampleProfessor;
 import com.alunos.scholl.domain.turma.dto.response.SampleTurma;
 
@@ -10,4 +11,11 @@ public record MateriaSample(
         String nome,
         SampleProfessor sampleProfessor,
         SampleTurma sampleTurma
-) { }
+) {
+
+    public MateriaSample(Materia materia) {
+        this(materia.getId(), materia.getNome(),
+                new SampleProfessor(materia.getProfessor()),
+                new SampleTurma(materia.getTurma()));
+    }
+}
