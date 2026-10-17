@@ -19,4 +19,10 @@ public class NotaAlunoId {
     @ManyToOne
     @JoinColumn(name = "materia_id")
     Materia materia;
+
+    public NotaAlunoId(Aluno aluno, Periodo periodo, Materia materia) {
+        this.aluno = aluno;
+        this.periodo = periodo;
+        this.materia = materia;
+    }
 }
