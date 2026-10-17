@@ -9,4 +9,6 @@ import java.util.UUID;
 
 public interface NotaAlunoRepository extends JpaRepository<NotaAluno, NotaAlunoId> {
     List<NotaAluno> findByNotaAlunoIdAluno(UUID alunoId);
+
+    List<NotaAluno> findByNotaAlunoIdMateriaAndPeriodo(UUID materiaId, UUID periodo);
 }

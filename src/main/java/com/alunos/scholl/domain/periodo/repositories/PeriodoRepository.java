@@ -27,4 +27,13 @@ public interface PeriodoRepository extends JpaRepository<Periodo, UUID> {
             
     """)
     Page<Periodo> findByProfessorId(UUID id, PageRequest of);
+
+    @Query("""
+        SELECT DISTINCT p FROM PeriodoMateria pm
+        JOIN pm.periodoMateriaId.materia m
+        JOIN pm.periodoMateriaId.periodo p
+            
+        WHERE m.id = :materiaId
+    """)
+    Page<Periodo> findByMateriaId(UUID materiaId, Pageable pageable);
 }
