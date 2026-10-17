@@ -3,10 +3,9 @@ package com.alunos.scholl.domain.materia.model;
 import com.alunos.scholl.domain.BaseEntity;
 import com.alunos.scholl.domain.professor.model.Professor;
 import com.alunos.scholl.domain.turma.model.Turma;
+import com.alunos.scholl.domain.user.model.User;
 import jakarta.persistence.*;
-import lombok.Getter;
-import lombok.NoArgsConstructor;
-import lombok.Setter;
+import lombok.*;
 
 import java.util.UUID;
 
@@ -14,6 +13,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @NoArgsConstructor
+@AllArgsConstructor
+@Builder
 public class Materia extends BaseEntity {
 
     @Id
@@ -29,4 +30,8 @@ public class Materia extends BaseEntity {
     @ManyToOne(fetch = FetchType.LAZY)
     @JoinColumn(name = "turma")
     Turma turma;
+
+    @ManyToOne(fetch = FetchType.LAZY)
+    @JoinColumn(name = "dono")
+    User dono;
 }
