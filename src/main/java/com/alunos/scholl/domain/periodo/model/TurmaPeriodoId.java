@@ -14,4 +14,9 @@ public class TurmaPeriodoId {
     @ManyToOne
     @JoinColumn(name = "turma_id")
     Turma turma;
+
+    public TurmaPeriodoId(Periodo periodo, Turma turma) {
+            this.periodo = periodo;
+            this.turma = turma;
+    }
 }
