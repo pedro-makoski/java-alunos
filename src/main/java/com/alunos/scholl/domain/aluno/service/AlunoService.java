@@ -61,6 +61,12 @@ public class AlunoService {
     public Page<AlunoSample> getAlunos(int pageNumber, HttpServletRequest httpServletRequest) {
         var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
+        if(user.isTeacher()) {
+            return alunoRepository
+                    .findByProfessorId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .map(AlunoSample::new);
+        }
+
         return alunoRepository
                     .findByDonoId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
                     .map(AlunoSample::new);

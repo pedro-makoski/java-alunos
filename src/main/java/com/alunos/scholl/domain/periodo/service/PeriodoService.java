@@ -57,6 +57,12 @@ public class PeriodoService {
                                              HttpServletRequest httpServletRequest) {
             var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
+            if(user.isTeacher()) {
+                return periodoRepository.findByProfessorId(user.getId(),
+                                PageRequest.of(pageNumber, Constants.pageSize))
+                        .map(PeriodoSample::new);
+            }
+
             return periodoRepository.findByDonoId(user.getId(),
                     PageRequest.of(pageNumber, Constants.pageSize))
                     .map(PeriodoSample::new);

@@ -42,8 +42,13 @@ public class User extends BaseEntity implements UserDetails {
     @Override
     @Transient
     public Collection<? extends GrantedAuthority> getAuthorities() {
-        String role = (professor == null) ? Authorities.PROFESSOR.name : Authorities.DONO.name;
+        String role = this.isTeacher() ? Authorities.PROFESSOR.name : Authorities.DONO.name;
         return List.of(new SimpleGrantedAuthority(role));
+    }
+
+    @Transient
+    public Boolean isTeacher() {
+        return professor != null;
     }
 
     @Override
