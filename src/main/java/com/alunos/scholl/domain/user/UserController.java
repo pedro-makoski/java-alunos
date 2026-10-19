@@ -34,6 +34,6 @@ public class UserController {
 
     @PostMapping("/deslogin")
     public ResponseEntity<?> deslogin() {
-        loginService.deslogin();
+        return loginService.deslogin();
     }
 }
