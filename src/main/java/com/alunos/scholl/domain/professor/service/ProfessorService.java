@@ -1,4 +1,4 @@
-package com.alunos.scholl.domain.service;
+package com.alunos.scholl.domain.professor.service;
 
 import com.alunos.scholl.domain.professor.dto.request.CreateProfessorRequest;
 import com.alunos.scholl.domain.professor.dto.response.CreateProfessorResponse;

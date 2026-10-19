@@ -27,7 +27,8 @@ public class UserController {
     }
 
     @PostMapping("/create-account")
-    public ResponseEntity<LoginResponse> createAccount(CreateAccountRequest createAccountRequest) {
+    public ResponseEntity<LoginResponse> createAccount(
+            @RequestBody CreateAccountRequest createAccountRequest) {
         return loginService.createAccount(createAccountRequest);
     }
 

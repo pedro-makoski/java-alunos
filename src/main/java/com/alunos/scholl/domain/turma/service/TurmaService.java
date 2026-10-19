@@ -19,7 +19,6 @@ import org.springframework.data.domain.PageRequest;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
-import org.springframework.web.servlet.support.ServletUriComponentsBuilder;
 
 import java.net.URI;
 import java.util.UUID;
@@ -67,7 +66,7 @@ public class TurmaService {
                 .map(SampleTurma::new);
     }
 
-    public SampleTurma getAlunoById(UUID id, HttpServletRequest request) {
+    public SampleTurma getTurmaById(UUID id, HttpServletRequest request) {
         var user = getUserOnRequest.realizeWithThrow(request);
 
         return new SampleTurma(getTurma(id, user));
