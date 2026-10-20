@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/professor")
-@SecurityRequirement(name = "jwt-cookie")
 public class ProfessorController {
 
     @Autowired

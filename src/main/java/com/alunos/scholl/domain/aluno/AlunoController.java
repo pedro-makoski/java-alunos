@@ -20,7 +20,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/aluno")
-@SecurityRequirement(name = "jwt-cookie")
 public class AlunoController {
 
     @Autowired

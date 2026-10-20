@@ -15,7 +15,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/turma")
-@SecurityRequirement(name = "jwt-cookie")
 public class TurmaController {
 
     @Autowired

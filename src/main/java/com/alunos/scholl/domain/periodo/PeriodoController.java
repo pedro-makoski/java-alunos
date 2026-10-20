@@ -16,7 +16,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/periodo")
-@SecurityRequirement(name = "jwt-cookie")
 public class PeriodoController {
 
     @Autowired

@@ -15,15 +15,6 @@ public class OpenApiConfiguration {
     @Bean
     public OpenAPI customOpenAPI() {
         return new OpenAPI()
-                .components(new Components()
-                        .addSecuritySchemes("jwt-cookie",
-                                new SecurityScheme()
-                                        .type(SecurityScheme.Type.APIKEY)
-                                        .in(SecurityScheme.In.COOKIE)
-                                        .name("jwt")))
-                .addSecurityItem(
-                        new SecurityRequirement()
-                                .addList("jwt-cookie"))
                 .info(new Info()
                         .title("Java Scholls")
                         .description("API Rest para teste em escolas para a organização de alunos"));

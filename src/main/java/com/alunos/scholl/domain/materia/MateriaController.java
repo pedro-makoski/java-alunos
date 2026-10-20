@@ -20,7 +20,6 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/materia")
-@SecurityRequirement(name = "jwt-cookie")
 public class MateriaController {
 
     @Autowired

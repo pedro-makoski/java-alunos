@@ -22,7 +22,7 @@ public class BaseEntity {
     @LastModifiedDate
     Instant updatedAt;
 
-    Boolean isDeleted;
+    Boolean isDeleted = false;
 
     Instant deletedAt;
 }

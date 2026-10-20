@@ -3,6 +3,7 @@ package com.alunos.scholl.domain.user.service;
 import com.alunos.scholl.domain.user.dtos.request.CreateAccountRequest;
 import com.alunos.scholl.domain.user.dtos.request.LoginRequest;
 import com.alunos.scholl.domain.user.dtos.response.LoginResponse;
+import com.alunos.scholl.domain.user.exceptions.EmailAlreadyUsed;
 import com.alunos.scholl.domain.user.exceptions.UserException;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.repositories.UserRepository;
@@ -38,7 +39,7 @@ public class LoginService {
         var user = userRepository.findByEmail(loginRequest.email())
                 .orElseThrow(UserException::new);
 
-        var token = new UsernamePasswordAuthenticationToken(user.getId(), user.getPassword());
+        var token = new UsernamePasswordAuthenticationToken(user.getUsername(), loginRequest.senha());
         var autentication = manager.authenticate(token);
 
         return autenticateUser((User) autentication.getPrincipal());
@@ -49,6 +50,10 @@ public class LoginService {
     }
 
     public User createUser(@Valid CreateAccountRequest createAccountRequest) {
+        if(userRepository.findByEmail(createAccountRequest.email()).isPresent()) {
+            throw new EmailAlreadyUsed();
+        }
+
         var user = User.builder()
                 .nome(createAccountRequest.nome())
                 .dataNascimento(createAccountRequest.dataNascimento())
