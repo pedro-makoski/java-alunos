@@ -30,9 +30,6 @@ public class AlunoController {
     @Autowired
     private AlunoNotasService alunoNotasService;
 
-    @Autowired
-    private TurmaGradeNotasService turmaGradeNotasService;
-
     @PostMapping("/create")
     public ResponseEntity<CreateAlunoResponse> create(
             @RequestBody CreateAlunoRequest createAlunoRequest,
@@ -90,25 +87,5 @@ public class AlunoController {
             @RequestParam UUID idPeriodo
     ) {
         return alunoNotasService.getNotaAluno(httpServletRequest, idAluno, idMateria, idPeriodo);
-    }
-
-    @GetMapping("/grid-materias/get")
-    public GridNotas getNotasOfMateria(
-            @RequestParam UUID periodoId,
-            @RequestParam UUID materiaId,
-            HttpServletRequest httpServletRequest
-    ) {
-        return turmaGradeNotasService
-                .getNotasOfMateria(materiaId, periodoId, httpServletRequest);
-    }
-
-    @GetMapping("/grid-materia/get-periodos")
-    public Page<PeriodoSample> getPeriodosOfMateria(
-            HttpServletRequest httpServletRequest,
-            @RequestParam UUID idMateria,
-            @RequestParam(defaultValue = "0", required = false) int pageNumber
-    ) {
-        return turmaGradeNotasService
-                .getPeriodosOfMateria(httpServletRequest, idMateria, pageNumber);
     }
 }
