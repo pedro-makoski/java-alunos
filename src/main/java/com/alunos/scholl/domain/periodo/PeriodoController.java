@@ -4,6 +4,7 @@ import com.alunos.scholl.domain.periodo.dto.request.CreatePeriodoRequest;
 import com.alunos.scholl.domain.periodo.dto.response.CreatePeriodoResponse;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
 import com.alunos.scholl.domain.periodo.service.PeriodoService;
+import com.alunos.scholl.domain.periodo.service.TurmaPeriodoService;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -18,6 +19,9 @@ public class PeriodoController {
 
     @Autowired
     private PeriodoService periodoService;
+
+    @Autowired
+    private TurmaPeriodoService turmaPeriodoService;
 
     @PostMapping("/create")
     public ResponseEntity<CreatePeriodoResponse> create(
@@ -41,4 +45,14 @@ public class PeriodoController {
             HttpServletRequest request) {
         return periodoService.getPeriodoById(id, request);
     }
+
+    @PatchMapping("/add-turma-in-periodo/{periodoId}")
+    public ResponseEntity<?> addTurmaInPeriodo(
+            HttpServletRequest httpServletRequest,
+            @RequestParam UUID turmaId,
+            @PathVariable UUID periodoId
+    ) {
+        return turmaPeriodoService.addTurmaInPeriodo(httpServletRequest, turmaId, periodoId);
+    }
+
 }
