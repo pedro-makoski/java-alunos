@@ -4,6 +4,7 @@ import com.alunos.scholl.domain.turma.dto.request.CreateTurmaRequest;
 import com.alunos.scholl.domain.turma.dto.response.CreateTurmaResponse;
 import com.alunos.scholl.domain.turma.dto.response.SampleTurma;
 import com.alunos.scholl.domain.turma.service.TurmaService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/turma")
+@SecurityRequirement(name = "jwt-cookie")
 public class TurmaController {
 
     @Autowired

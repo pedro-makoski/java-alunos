@@ -8,6 +8,7 @@ import com.alunos.scholl.domain.aluno.service.AlunoOverviewService;
 import com.alunos.scholl.domain.aluno.service.AlunoService;
 import com.alunos.scholl.domain.aluno.service.TurmaGradeNotasService;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/aluno")
+@SecurityRequirement(name = "jwt-cookie")
 public class AlunoController {
 
     @Autowired

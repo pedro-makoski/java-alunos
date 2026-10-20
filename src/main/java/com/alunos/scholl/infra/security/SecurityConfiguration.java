@@ -25,16 +25,17 @@ public class SecurityConfiguration {
         return http.csrf(c -> c.disable())
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(s ->
-                    s.requestMatchers(HttpMethod.POST, "/user/login",
-                                    "/user/create-account")
+                    s.requestMatchers("/user/login",
+                                    "/user/create-account", "/v3/api-docs/**",
+                                    "/swagger-ui.html", "/swagger-ui/**")
                             .permitAll()
                      .requestMatchers("/turma/**", "/aluno/**", "/periodo/**",
                              "/materia/**")
                                 .hasAuthority(Authorities.DONO.name)
                      .requestMatchers(
-                            "/user/deslogin", "/my-turmas", "/get-alunos",
-                             "/periodos", "/materias",
-                             "/aluno/infos", "/materia/infos", "/materia/infos/{id}"
+                            "/user/deslogin", "/turma", "/aluno",
+                             "/periodo", "/materia",
+                             "/aluno/{id}", "/materia/{id}", "/materia/{id}"
                      ).authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

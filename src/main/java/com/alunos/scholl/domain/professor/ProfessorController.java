@@ -4,6 +4,7 @@ import com.alunos.scholl.domain.professor.dto.request.CreateProfessorRequest;
 import com.alunos.scholl.domain.professor.dto.response.CreateProfessorResponse;
 import com.alunos.scholl.domain.professor.dto.response.SampleProfessor;
 import com.alunos.scholl.domain.professor.service.ProfessorService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -14,6 +15,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/professor")
+@SecurityRequirement(name = "jwt-cookie")
 public class ProfessorController {
 
     @Autowired

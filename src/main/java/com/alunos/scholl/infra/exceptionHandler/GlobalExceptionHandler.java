@@ -1,6 +1,7 @@
 package com.alunos.scholl.infra.exceptionHandler;
 
 import com.alunos.scholl.infra.exceptions.NotFoundException;
+import jakarta.validation.ConstraintViolationException;
 import org.springframework.http.ResponseEntity;
 import org.springframework.http.converter.HttpMessageNotReadableException;
 import org.springframework.validation.FieldError;
@@ -14,15 +15,15 @@ import java.util.List;
 @RestControllerAdvice
 public class GlobalExceptionHandler {
 
-    @ExceptionHandler(MethodArgumentNotValidException.class)
+    @ExceptionHandler(ConstraintViolationException.class)
     public ResponseEntity<InvalidExceptionDto> methodArgumentNotValidException(
-            MethodArgumentNotValidException ex) {
-        List<FieldError> errosCampos = ex.getBindingResult().getFieldErrors();
-
-        List<InvalidExceptionDto.FieldError> campos = errosCampos.stream()
+            ConstraintViolationException ex) {
+        List<InvalidExceptionDto.FieldError> campos = ex
+                .getConstraintViolations()
+                .stream()
                 .map(erro ->
-                        new InvalidExceptionDto.FieldError(erro.getField(),
-                                erro.getDefaultMessage()))
+                        new InvalidExceptionDto.FieldError(erro.getPropertyPath().toString(),
+                                erro.getMessage()))
                 .toList();
 
         return ResponseEntity
@@ -55,10 +56,10 @@ public class GlobalExceptionHandler {
                 ));
     }
 
-    @ExceptionHandler(Exception.class)
+    @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionDto> notFoundException(Exception ex) {
         return ResponseEntity
-                .badRequest()
+                .internalServerError()
                 .body(new ExceptionDto(
                         "Houve um erro interno no sistema"
                 ));

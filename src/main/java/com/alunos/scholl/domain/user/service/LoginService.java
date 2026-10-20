@@ -54,6 +54,7 @@ public class LoginService {
                 .dataNascimento(createAccountRequest.dataNascimento())
                 .sobrenome(createAccountRequest.sobrenome())
                 .nome(createAccountRequest.nome())
+                .email(createAccountRequest.email())
                 .senha(passwordEncoder.encode(createAccountRequest.senha()))
                 .build();
 

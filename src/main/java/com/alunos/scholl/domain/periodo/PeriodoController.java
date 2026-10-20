@@ -5,6 +5,7 @@ import com.alunos.scholl.domain.periodo.dto.response.CreatePeriodoResponse;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
 import com.alunos.scholl.domain.periodo.service.PeriodoService;
 import com.alunos.scholl.domain.periodo.service.TurmaPeriodoService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -15,6 +16,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/periodo")
+@SecurityRequirement(name = "jwt-cookie")
 public class PeriodoController {
 
     @Autowired

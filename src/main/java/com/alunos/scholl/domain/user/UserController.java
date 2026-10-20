@@ -4,6 +4,7 @@ import com.alunos.scholl.domain.user.dtos.request.CreateAccountRequest;
 import com.alunos.scholl.domain.user.dtos.request.LoginRequest;
 import com.alunos.scholl.domain.user.dtos.response.LoginResponse;
 import com.alunos.scholl.domain.user.service.LoginService;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
@@ -34,6 +35,7 @@ public class UserController {
 
 
     @PostMapping("/deslogin")
+    @SecurityRequirement(name = "jwt-cookie")
     public ResponseEntity<?> deslogin() {
         return loginService.deslogin();
     }

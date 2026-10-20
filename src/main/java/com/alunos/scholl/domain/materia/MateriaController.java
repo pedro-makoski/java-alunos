@@ -9,6 +9,7 @@ import com.alunos.scholl.domain.materia.service.FindMyAlunosService;
 import com.alunos.scholl.domain.materia.service.MateriaService;
 import com.alunos.scholl.domain.materia.service.PeriodoMateriaService;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
+import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -19,6 +20,7 @@ import java.util.UUID;
 
 @RestController
 @RequestMapping("/materia")
+@SecurityRequirement(name = "jwt-cookie")
 public class MateriaController {
 
     @Autowired
