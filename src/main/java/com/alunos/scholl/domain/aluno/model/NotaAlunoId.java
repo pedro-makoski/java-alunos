@@ -3,7 +3,9 @@ package com.alunos.scholl.domain.aluno.model;
 import com.alunos.scholl.domain.materia.model.Materia;
 import com.alunos.scholl.domain.periodo.model.Periodo;
 import jakarta.persistence.*;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 import java.time.format.DateTimeFormatter;
@@ -12,6 +14,8 @@ import java.util.UUID;
 @Getter
 @Setter
 @Embeddable
+@NoArgsConstructor
+@EqualsAndHashCode
 public class NotaAlunoId {
     @ManyToOne
     @JoinColumn(name = "aluno_id")

@@ -4,12 +4,13 @@ import com.alunos.scholl.domain.periodo.model.Periodo;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
-import lombok.Getter;
-import lombok.Setter;
+import lombok.*;
 
 @Getter
 @Setter
 @Embeddable
+@NoArgsConstructor
+@EqualsAndHashCode
 public class PeriodoMateriaId {
     @ManyToOne
     @JoinColumn(name = "materia_id")

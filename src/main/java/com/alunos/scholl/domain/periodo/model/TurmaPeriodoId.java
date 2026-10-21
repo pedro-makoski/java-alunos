@@ -4,12 +4,16 @@ import com.alunos.scholl.domain.turma.model.Turma;
 import jakarta.persistence.Embeddable;
 import jakarta.persistence.JoinColumn;
 import jakarta.persistence.ManyToOne;
+import lombok.EqualsAndHashCode;
 import lombok.Getter;
+import lombok.NoArgsConstructor;
 import lombok.Setter;
 
 @Embeddable
 @Getter
 @Setter
+@NoArgsConstructor
+@EqualsAndHashCode
 public class TurmaPeriodoId {
     @ManyToOne
     @JoinColumn(name = "periodo_id")

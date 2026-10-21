@@ -132,14 +132,4 @@ public class GlobalExceptionHandler {
                         String.format("O campo %s não pode ser nulo", ex.getParameterName())
                 ));
     }
-
-    @ExceptionHandler(AccessDeniedException.class)
-    public ResponseEntity<ExceptionDto>
-        acessDefinedException(AccessDeniedException ex) {
-        return ResponseEntity
-                .badRequest()
-                .body(new ExceptionDto(
-                        String.format("Você não tem permissão para entrar nessa rota")
-                ));
-    }
 }
