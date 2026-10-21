@@ -30,7 +30,7 @@ public class SecurityConfiguration {
                                     "/swagger-ui.html", "/swagger-ui/**")
                             .permitAll()
                      .requestMatchers("/turma/**", "/aluno/**", "/periodo/**",
-                             "/materia/**")
+                             "/materia/**", "/professor/**")
                                 .hasAuthority(Authorities.DONO.name)
                      .requestMatchers(
                             "/user/deslogin", "/turma", "/aluno",

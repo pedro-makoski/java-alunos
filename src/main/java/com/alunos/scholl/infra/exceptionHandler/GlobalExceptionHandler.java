@@ -12,10 +12,12 @@ import org.springframework.security.authentication.BadCredentialsException;
 import org.springframework.security.authentication.InsufficientAuthenticationException;
 import org.springframework.validation.FieldError;
 import org.springframework.web.bind.MethodArgumentNotValidException;
+import org.springframework.web.bind.MissingServletRequestParameterException;
 import org.springframework.web.bind.annotation.ExceptionHandler;
 import org.springframework.web.bind.annotation.RestControllerAdvice;
 import org.springframework.web.method.annotation.MethodArgumentTypeMismatchException;
 
+import java.nio.file.AccessDeniedException;
 import java.util.List;
 
 @RestControllerAdvice
@@ -118,6 +120,26 @@ public class GlobalExceptionHandler {
                 .internalServerError()
                 .body(new ExceptionDto(
                         "Houve um erro interno no sistema"
+                ));
+    }
+
+    @ExceptionHandler(MissingServletRequestParameterException.class)
+    public ResponseEntity<ExceptionDto>
+                campoCantBeNull(MissingServletRequestParameterException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ExceptionDto(
+                        String.format("O campo %s não pode ser nulo", ex.getParameterName())
+                ));
+    }
+
+    @ExceptionHandler(AccessDeniedException.class)
+    public ResponseEntity<ExceptionDto>
+        acessDefinedException(AccessDeniedException ex) {
+        return ResponseEntity
+                .badRequest()
+                .body(new ExceptionDto(
+                        String.format("Você não tem permissão para entrar nessa rota")
                 ));
     }
 }
