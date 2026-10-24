@@ -56,4 +56,22 @@ class TurmaControllerTest {
     @DisplayName("Envia uma turma válida e espera retorno com os dados corretos")
     void getPeriodoValidById() {
     }
+
+    @Test
+    @DisplayName("Envia um conjunto de turmas válidas de um professor e verifica se" +
+            "apenas as do professor foram retornadas")
+    void getMyTurmaByTeacher() {
+    }
+
+    @Test
+    @DisplayName("Envia uma turma válida de um professor " +
+            "e espera retorno como encontrado ")
+    void getTurmaValidByIdOnTeacher() {
+    }
+
+    @Test
+    @DisplayName("Envia uma turma válida que não é do professor " +
+            "e espera retorno como não encontrado ")
+    void getTurmaValidByIdOnNotTeacher() {
+    }
 }

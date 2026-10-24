@@ -8,6 +8,7 @@ import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
 import com.alunos.scholl.domain.periodo.repositories.PeriodoRepository;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import com.alunos.scholl.infra.Constants;
+import com.alunos.scholl.infra.utils.PermissionValidationAndGet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
@@ -35,6 +36,9 @@ public class TurmaGradeNotasService {
     @Autowired
     private MateriaService materiaService;
 
+    @Autowired
+    private PermissionValidationAndGet permissionValidationAndGet;
+
     public GridNotas getNotasOfMateria(
             UUID materiaId,
             UUID periodoId,
@@ -42,8 +46,7 @@ public class TurmaGradeNotasService {
     ) {
         var user =  getUserOnRequest.realizeWithThrow(httpServletRequest);
 
-        var finalUser = user.isTeacher() ?
-                user.getProfessor().getDono() : user;
+        var materia = permissionValidationAndGet.validateAndGetMateria(materiaId, user);
 
         var result = notaAlunoRepository.findByNotaAlunoIdMateriaAndNotaAlunoIdPeriodo(materiaId, periodoId);
 
@@ -62,10 +65,7 @@ public class TurmaGradeNotasService {
     ) {
         var user =  getUserOnRequest.realizeWithThrow(httpServletRequest);
 
-        var finalUser = user.isTeacher() ?
-                user.getProfessor().getDono() : user;
-
-        var materia = materiaService.getByMateriaId(idMateria, finalUser);
+        var materia = permissionValidationAndGet.validateAndGetMateria(idMateria, user);
 
         return periodoRepository
                 .findByMateriaId(materia.getId(), PageRequest.of(pageNumber, Constants.pageSize))

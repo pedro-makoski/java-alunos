@@ -9,8 +9,8 @@ import com.alunos.scholl.domain.aluno.repositories.AlunoRepository;
 import com.alunos.scholl.domain.aluno.repositories.NotaAlunoRepository;
 import com.alunos.scholl.domain.materia.service.MateriaService;
 import com.alunos.scholl.domain.periodo.service.PeriodoService;
-import com.alunos.scholl.domain.turma.service.TurmaService;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
+import com.alunos.scholl.infra.utils.PermissionValidationAndGet;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -42,6 +42,9 @@ public class AlunoNotasService {
     @Autowired
     private PeriodoService periodoService;
 
+    @Autowired
+    private PermissionValidationAndGet permissionValidationAndGet;
+
     public ResponseEntity<?> addNotaToAluno(
             @Valid AddNotaRequest addNotaRequest,
             HttpServletRequest httpServletRequest
@@ -51,9 +54,10 @@ public class AlunoNotasService {
         var finalUser = user.isTeacher() ?
                 user.getProfessor().getDono() : user;
 
-        var materia = materiaService.getByMateriaId(addNotaRequest.materiaId(), finalUser);
         var aluno = alunoService.getAlunoById(addNotaRequest.idAluno(), finalUser);
         var periodo = periodoService.getPeriodoById(addNotaRequest.idPeriodo(), finalUser);
+
+        var materia = permissionValidationAndGet.validateAndGetMateria(addNotaRequest.materiaId(), user);
 
         var nota = notaAlunoRepository
                 .findById(new NotaAlunoId(aluno, periodo, materia))
@@ -83,9 +87,10 @@ public class AlunoNotasService {
         var finalUser = user.isTeacher() ?
                 user.getProfessor().getDono() : user;
 
-        var materia = materiaService.getByMateriaId(idMateria, finalUser);
         var aluno = alunoService.getAlunoById(idAluno, finalUser);
         var periodo = periodoService.getPeriodoById(idPeriodo, finalUser);
+
+        var materia = permissionValidationAndGet.validateAndGetMateria(idMateria, user);
 
         var nota = notaAlunoRepository.findById(new NotaAlunoId(
                 aluno,

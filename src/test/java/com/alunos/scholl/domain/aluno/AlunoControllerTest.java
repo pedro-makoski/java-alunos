@@ -34,7 +34,6 @@ class AlunoControllerTest {
     @DisplayName("Validar se não aceita envios inválidos")
     void createInvalid() {
 
-
     }
 
     @Test
@@ -60,8 +59,26 @@ class AlunoControllerTest {
     }
 
     @Test
+    @DisplayName("Envia um conjunto de alunos válidos de um professor e de um que não é" +
+            "e valida de se retorna os do professor")
+    void getMyAlunosByTeacher() {
+    }
+
+    @Test
     @DisplayName("Envia um aluno válidos e espera retorno com os dados corretos")
     void getAlunoValidById() {
+    }
+
+    @Test
+    @DisplayName("Envia um aluno válido de um professor " +
+            "e espera retorno como encontrado ")
+    void getAlunoValidByIdOnTeacher() {
+    }
+
+    @Test
+    @DisplayName("Envia um aluno válido que não é do professor " +
+            "e espera retorno como não encontrado ")
+    void getAlunoValidByIdOnNotTeacher() {
     }
 
     @Test

@@ -9,7 +9,7 @@ import com.alunos.scholl.domain.turma.repositories.TurmaRepository;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import com.alunos.scholl.infra.Constants;
-import com.alunos.scholl.infra.exceptions.YouDontHavePermission;
+import com.alunos.scholl.infra.utils.PermissionValidationAndGet;
 import com.alunos.scholl.infra.utils.URIGeneratorOfBaseAndId;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -29,6 +29,9 @@ public class TurmaService {
 
     @Autowired
     TurmaRepository turmaRepository;
+
+    @Autowired
+    private PermissionValidationAndGet permissionValidationAndGet;
 
     @Autowired
     private GetUserOnRequest getUserOnRequest;
@@ -61,6 +64,12 @@ public class TurmaService {
     ) {
         var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
+        if(user.isTeacher()) {
+            return turmaRepository
+                    .findByTeacherId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .map(SampleTurma::new);
+        }
+
         return turmaRepository
                 .findAllByDonoId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
                 .map(SampleTurma::new);
@@ -73,14 +82,7 @@ public class TurmaService {
     }
 
     public Turma getTurma(UUID idTurma, User user) {
-        var turma = turmaRepository.findById(idTurma)
-                .orElseThrow(TurmaNotFound::new);
-
-        if(!turma.getDono().getId().equals(user.getId())) {
-            throw new YouDontHavePermission();
-        }
-
-        return turma;
+        return permissionValidationAndGet.validateAndGetTurma(idTurma, user);
     }
 
     private URI getUriOfTurma(Turma turma) {

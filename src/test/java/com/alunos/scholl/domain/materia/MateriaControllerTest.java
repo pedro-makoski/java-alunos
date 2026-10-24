@@ -49,12 +49,24 @@ class MateriaControllerTest {
 
     @Test
     @DisplayName("Envia uma matéria inválida e espera retorno not found")
-    void getAlunoInvalidById() {
+    void getMateriaInvalidById() {
     }
 
     @Test
     @DisplayName("Envia um aluno válido e espera retorno com os dados corretos")
-    void getAlunoValidById() {
+    void getMateriaValidById() {
+    }
+
+    @Test
+    @DisplayName("Envia uma matéria válida de um professor " +
+            "e espera retorno como encontrado ")
+    void getMateriaValidByIdOnTeacher() {
+    }
+
+    @Test
+    @DisplayName("Envia uma matéria válido que não é do professor " +
+            "e espera retorno como não encontrado ")
+    void getMateiraValidByIdOnNotTeacher() {
     }
 
 
@@ -73,6 +85,12 @@ class MateriaControllerTest {
     @DisplayName("Adiciona períodos na matéria e verifica " +
             "se eles foram realmente adicionados")
     void getPeriodosOfMateria() {
+    }
+
+    @Test
+    @DisplayName("Envia um conjunto de materias válidas de um professor e verifica se" +
+            "apenas a do professor foi retornada")
+    void getMyMateriasByTeacher() {
     }
 
     @Test

@@ -4,6 +4,7 @@ import com.alunos.scholl.domain.aluno.dto.response.AlunoDetails;
 import com.alunos.scholl.domain.aluno.exceptions.NoAlunoFound;
 import com.alunos.scholl.domain.aluno.repositories.NotaAlunoRepository;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
+import com.alunos.scholl.infra.utils.PermissionValidationAndGet;
 import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.stereotype.Service;
@@ -24,6 +25,9 @@ public class AlunoOverviewService {
     @Autowired
     NotaAlunoRepository notaAlunoRepository;
 
+    @Autowired
+    PermissionValidationAndGet permissionValidationAndGet;
+
     public AlunoDetails getAlunoDetails(
             UUID idAluno,
             HttpServletRequest httpServletRequest
@@ -33,7 +37,7 @@ public class AlunoOverviewService {
         var finalUser = user.isTeacher() ?
                 user.getProfessor().getDono() : user;
 
-        var aluno = alunoService.getAlunoById(idAluno, finalUser);
+        var aluno = permissionValidationAndGet.validateAndGetAluno(idAluno, user);
 
         var notas = notaAlunoRepository.findByNotaAlunoIdAluno(idAluno);
 

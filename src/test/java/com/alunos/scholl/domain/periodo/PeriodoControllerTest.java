@@ -61,4 +61,34 @@ class PeriodoControllerTest {
     @DisplayName("Adiciona turma em um período e verifica se foi realmente adicionado")
     void addTurmaInPeriodo() {
     }
+
+    @Test
+    @DisplayName("Envia um conjunto de períodos válidos de um professor e verifica se" +
+            "apenas a do professor foram retornadas")
+    void getMyPeriodoByTeacher() {
+    }
+
+    @Test
+    @DisplayName("Envia um período válido de um professor " +
+            "e espera retorno como encontrado ")
+    void getPeriodoValidByIdOnTeacher() {
+    }
+
+    @Test
+    @DisplayName("Envia um período válido que não é do professor " +
+            "e espera retorno como não encontrado ")
+    void getPeridooValidByIdOnNotTeacher() {
+    }
+
+    @Test
+    @DisplayName("Adiciona turma ao aluno e " +
+            "verifica se ela foram realmente adicionadas")
+    void getTurmaOfAluno() {
+    }
+
+    @Test
+    @DisplayName("Adiciona período na matéria e " +
+            "verifica se foi realmente adicionada")
+    void addPeriodoInMateria() {
+    }
 }

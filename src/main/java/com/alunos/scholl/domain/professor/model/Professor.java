@@ -2,6 +2,7 @@ package com.alunos.scholl.domain.professor.model;
 
 import com.alunos.scholl.domain.BaseEntity;
 import com.alunos.scholl.domain.user.model.User;
+import com.alunos.scholl.infra.standarts.HasDono;
 import jakarta.persistence.*;
 import lombok.*;
 
@@ -13,7 +14,7 @@ import java.util.UUID;
 @NoArgsConstructor
 @AllArgsConstructor
 @Builder
-public class Professor extends BaseEntity {
+public class Professor extends BaseEntity implements HasDono {
 
     @Id
     @GeneratedValue(strategy = GenerationType.UUID)

@@ -29,6 +29,21 @@ public interface PeriodoRepository extends JpaRepository<Periodo, UUID> {
     Page<Periodo> findByProfessorId(UUID id, PageRequest of);
 
     @Query("""
+        SELECT p FROM TurmaPeriodo tp
+        JOIN tp.turmaPeriodoId tpi
+        JOIN tpi.periodo p
+        JOIN tpi.turma t
+        LEFT JOIN Materia m
+        JOIN m.professor prof
+        JOIN m.turma turma
+            
+        WHERE prof.id = :professorId
+        AND m.turma = t
+        AND p.id = :periodoId
+    """)
+    Optional<Periodo> findByPeriodoIdAndProfessorId(UUID periodoId, UUID professorId);
+
+    @Query("""
         SELECT DISTINCT p FROM PeriodoMateria pm
         JOIN pm.periodoMateriaId.materia m
         JOIN pm.periodoMateriaId.periodo p

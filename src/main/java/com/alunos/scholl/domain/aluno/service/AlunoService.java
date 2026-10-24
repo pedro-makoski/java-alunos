@@ -10,7 +10,7 @@ import com.alunos.scholl.domain.turma.service.TurmaService;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import com.alunos.scholl.infra.Constants;
-import com.alunos.scholl.infra.exceptions.YouDontHavePermission;
+import com.alunos.scholl.infra.utils.PermissionValidationAndGet;
 import com.alunos.scholl.infra.utils.URIGeneratorOfBaseAndId;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -35,6 +35,9 @@ public class AlunoService {
 
     @Autowired
     private TurmaService turmaService;
+
+    @Autowired
+    private PermissionValidationAndGet permissionValidationAndGet;
 
     public ResponseEntity<CreateAlunoResponse> postAluno
             (@Valid CreateAlunoRequest createAlunoRequest,
@@ -63,7 +66,7 @@ public class AlunoService {
 
         if(user.isTeacher()) {
             return alunoRepository
-                    .findByProfessorId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .findByProfessorId(user.getProfessor().getId(), PageRequest.of(pageNumber, Constants.pageSize))
                     .map(AlunoSample::new);
         }
 
@@ -97,13 +100,7 @@ public class AlunoService {
     }
 
     public Aluno getAlunoById(UUID id, User user) {
-        var aluno = alunoRepository.findById(id)
-                .orElseThrow(AlunoNotFound::new);
-
-        if(!aluno.getDono().getId().equals(user.getId())) {
-            throw new YouDontHavePermission();
-        }
-
-        return aluno;
+        return permissionValidationAndGet.
+                validateAndGetAluno(id, user);
     }
 }

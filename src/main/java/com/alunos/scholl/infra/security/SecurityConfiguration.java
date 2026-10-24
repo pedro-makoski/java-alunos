@@ -35,7 +35,8 @@ public class SecurityConfiguration {
                      .requestMatchers(
                             "/user/deslogin", "/turma", "/aluno",
                              "/periodo", "/materia",
-                             "/aluno/{id}", "/materia/{id}", "/materia/{id}"
+                             "/aluno/{id}", "/materia/{id}", "/turma/{id}",
+                             "/periodo/{id}"
                      ).authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

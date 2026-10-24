@@ -1,6 +1,5 @@
 package com.alunos.scholl.domain.periodo.service;
 
-import com.alunos.scholl.domain.aluno.dto.response.CreateAlunoResponse;
 import com.alunos.scholl.domain.periodo.dto.request.CreatePeriodoRequest;
 import com.alunos.scholl.domain.periodo.dto.response.CreatePeriodoResponse;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
@@ -10,14 +9,13 @@ import com.alunos.scholl.domain.periodo.repositories.PeriodoRepository;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import com.alunos.scholl.infra.Constants;
-import com.alunos.scholl.infra.exceptions.YouDontHavePermission;
+import com.alunos.scholl.infra.utils.PermissionValidationAndGet;
 import com.alunos.scholl.infra.utils.URIGeneratorOfBaseAndId;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.data.domain.PageRequest;
-import org.springframework.data.domain.Pageable;
 import org.springframework.http.ResponseEntity;
 import org.springframework.stereotype.Service;
 import org.springframework.validation.annotation.Validated;
@@ -33,6 +31,9 @@ public class PeriodoService {
 
     @Autowired
     private PeriodoRepository periodoRepository;
+
+    @Autowired
+    private PermissionValidationAndGet permissionValidationAndGet;
 
     public ResponseEntity<CreatePeriodoResponse>
         postPeriodo(@Valid CreatePeriodoRequest createPeriodoRequest,
@@ -58,7 +59,7 @@ public class PeriodoService {
             var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
             if(user.isTeacher()) {
-                return periodoRepository.findByProfessorId(user.getId(),
+                return periodoRepository.findByProfessorId(user.getProfessor().getId(),
                                 PageRequest.of(pageNumber, Constants.pageSize))
                         .map(PeriodoSample::new);
             }
@@ -76,13 +77,6 @@ public class PeriodoService {
     }
 
     public Periodo getPeriodoById(UUID id, User user) {
-        var periodo = periodoRepository.findById(id)
-                .orElseThrow(PeriodoNotFound::new);
-
-        if(!periodo.getDono().getId().equals(user.getId())) {
-            throw new YouDontHavePermission();
-        }
-
-        return periodo;
+        return permissionValidationAndGet.validateAndGetPeriodo(id, user);
     }
 }

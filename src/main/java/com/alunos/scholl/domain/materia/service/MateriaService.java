@@ -11,7 +11,7 @@ import com.alunos.scholl.domain.turma.service.TurmaService;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import com.alunos.scholl.infra.Constants;
-import com.alunos.scholl.infra.exceptions.YouDontHavePermission;
+import com.alunos.scholl.infra.utils.PermissionValidationAndGet;
 import com.alunos.scholl.infra.utils.URIGeneratorOfBaseAndId;
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
@@ -39,6 +39,9 @@ public class MateriaService {
 
     @Autowired
     private TurmaService turmaService;
+
+    @Autowired
+    private PermissionValidationAndGet permissionValidationAndGet;
 
     public ResponseEntity<CreateMateriaResponse> postMateria(
             @Valid CreateMateriaRequest createMateriaRequest,
@@ -93,7 +96,7 @@ public class MateriaService {
 
         if(user.isTeacher()) {
             materiaRepository
-                    .findByProfessorId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .findByProfessorId(user.getProfessor().getId(), PageRequest.of(pageNumber, Constants.pageSize))
                     .map(MateriaSample::new);
         }
 
@@ -115,13 +118,6 @@ public class MateriaService {
             UUID materiaId,
             User user
     ) {
-        var materia = materiaRepository.findById(materiaId)
-                .orElseThrow(MateriaNotFound::new);
-
-        if(!materia.getDono().getId().equals(user.getId())) {
-            throw new YouDontHavePermission();
-        }
-
-        return materia;
+        return permissionValidationAndGet.validateAndGetMateria(materiaId, user);
     }
 }
