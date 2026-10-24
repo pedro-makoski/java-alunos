@@ -15,10 +15,10 @@ public record CreateProfessorRequest(
         @NotNull(message = "O nome não pode ser nulo")
         String nome,
 
-        @NotNull(message = "A data de nascimento não pode ser nulo")
-        LocalDate dataNascimento,
-
         @NotNull(message = "O sobrenome não pode ser nulo")
-        String sobrenome
+        String sobrenome,
+
+        @NotNull(message = "A data de nascimento não pode ser nulo")
+        LocalDate dataNascimento
 ) {
 }

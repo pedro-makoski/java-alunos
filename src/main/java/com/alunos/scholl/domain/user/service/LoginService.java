@@ -75,7 +75,7 @@ public class LoginService {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(new LoginResponse("Usuário deslogado com sucesso!"));
+                .body(new LoginResponse("Usuário deslogado com sucesso!", null));
     }
 
     private ResponseEntity<LoginResponse> autenticateUser(User user) {
@@ -89,6 +89,6 @@ public class LoginService {
 
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
-                .body(new LoginResponse("Usuário logado"));
+                .body(new LoginResponse("Usuário logado", user.getId()));
     }
 }
