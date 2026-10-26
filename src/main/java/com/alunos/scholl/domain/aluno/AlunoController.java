@@ -14,6 +14,7 @@ import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -32,6 +33,7 @@ public class AlunoController {
     private AlunoNotasService alunoNotasService;
 
     @PostMapping("/create")
+    @Transactional
     public ResponseEntity<CreateAlunoResponse> create(
             @RequestBody CreateAlunoRequest createAlunoRequest,
             HttpServletRequest httpServletRequest
@@ -40,6 +42,7 @@ public class AlunoController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public Page<AlunoSample> getMyAlunos(
             HttpServletRequest httpServletRequest,
             @RequestParam(defaultValue = "0", required = false) int pageNumber
@@ -48,6 +51,7 @@ public class AlunoController {
     }
 
     @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public AlunoSample getAlunoById(
             @PathVariable UUID id,
             HttpServletRequest request) {
@@ -56,6 +60,7 @@ public class AlunoController {
 
 
     @PatchMapping("/turma/change")
+    @Transactional
     public ResponseEntity<?> updateAlunoTurma(
             @RequestParam UUID alunoId,
             @RequestParam UUID turmaId,
@@ -65,6 +70,7 @@ public class AlunoController {
     }
 
     @GetMapping("/overview/{id}")
+    @Transactional(readOnly = true)
     public AlunoDetails getAlunoDetails(
             @PathVariable UUID idAluno,
             HttpServletRequest httpServletRequest
@@ -73,6 +79,7 @@ public class AlunoController {
     }
 
     @PostMapping("/nota-aluno/create")
+    @Transactional
     public ResponseEntity<?> addNotaToAluno(
             @RequestBody AddNotaRequest addNotaRequest,
             HttpServletRequest httpServletRequest
@@ -81,6 +88,7 @@ public class AlunoController {
     }
 
     @GetMapping("/nota-aluno/post")
+    @Transactional
     public GetNotaAlunoResponse getNotaAluno(
             HttpServletRequest httpServletRequest,
             @RequestParam UUID idAluno,

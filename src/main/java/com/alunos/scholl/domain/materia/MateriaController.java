@@ -14,6 +14,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -35,6 +36,7 @@ public class MateriaController {
     private PeriodoMateriaService periodoMateriaService;
 
     @PostMapping("/create")
+    @Transactional
     public ResponseEntity<CreateMateriaResponse> create(
             @RequestBody CreateMateriaRequest createMateriaRequest,
             HttpServletRequest httpServletRequest
@@ -43,6 +45,7 @@ public class MateriaController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public Page<MateriaSample> getMyMaterias(
             HttpServletRequest httpServletRequest,
             @RequestParam(defaultValue = "0", required = false) int pageNumber
@@ -51,6 +54,7 @@ public class MateriaController {
     }
 
     @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public MateriaSample getMateriaById(
             @PathVariable UUID id,
             HttpServletRequest request) {
@@ -58,6 +62,7 @@ public class MateriaController {
     }
 
     @GetMapping("/change-turma-materia/{materiaId}")
+    @Transactional
     public ResponseEntity<?> changeTurmaInMateria(
             @RequestParam UUID turmaId,
             @PathVariable UUID materiaId,
@@ -67,6 +72,7 @@ public class MateriaController {
     }
 
     @GetMapping("/grid-materias/get")
+    @Transactional(readOnly = true)
     public GridNotas getNotasOfMateria(
             @RequestParam UUID periodoId,
             @RequestParam UUID materiaId,
@@ -77,6 +83,7 @@ public class MateriaController {
     }
 
     @GetMapping("/grid-materia/get-periodos")
+    @Transactional(readOnly = true)
     public Page<PeriodoSample> getPeriodosOfMateria(
             HttpServletRequest httpServletRequest,
             @RequestParam UUID idMateria,
@@ -87,6 +94,7 @@ public class MateriaController {
     }
 
     @GetMapping("/materias-of-aluno/{alunoId}")
+    @Transactional(readOnly = true)
     public Page<MateriaSample> getMateriasOfAluno(
             HttpServletRequest httpServletRequest,
             @PathVariable UUID alunoId,
@@ -97,6 +105,7 @@ public class MateriaController {
 
 
     @PatchMapping("/add-periodo-in-materia/{materiaId}")
+    @Transactional
     public ResponseEntity<?> addPeriodoInMateria(
             HttpServletRequest httpServletRequest,
             @RequestParam UUID periodoId,

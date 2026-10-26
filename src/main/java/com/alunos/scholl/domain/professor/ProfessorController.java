@@ -9,6 +9,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -21,6 +22,7 @@ public class ProfessorController {
     private ProfessorService professorService;
 
     @PostMapping("/create")
+    @Transactional
     public ResponseEntity<CreateProfessorResponse> create(
             @RequestBody CreateProfessorRequest createProfessorRequest,
             HttpServletRequest httpServletRequest
@@ -29,6 +31,7 @@ public class ProfessorController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public Page<SampleProfessor> getMyProfessores(
             HttpServletRequest httpServletRequest,
             @RequestParam(defaultValue = "0", required = false) int pageNumber
@@ -37,6 +40,7 @@ public class ProfessorController {
     }
 
     @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public SampleProfessor getProfessorById(
             @PathVariable UUID id,
             HttpServletRequest request) {

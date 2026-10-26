@@ -1,6 +1,9 @@
 package com.alunos.scholl.domain.aluno;
 
 import com.alunos.scholl.TestUtils;
+import com.alunos.scholl.domain.aluno.dto.request.CreateAlunoRequest;
+import com.alunos.scholl.domain.turma.model.Turma;
+import com.alunos.scholl.domain.turma.repositories.TurmaRepository;
 import com.alunos.scholl.domain.user.dtos.request.CreateAccountRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -30,10 +33,19 @@ class AlunoControllerTest {
 
     private JacksonTester<CreateAccountRequest> createAlunoRequest;
 
+    @Autowired
+    private TurmaRepository turmaRepository;
+
     @Test
     @DisplayName("Validar se não aceita envios inválidos")
     void createInvalid() {
+        var user = testUtils.addUserOnRequest();
 
+        var turmaBase = turmaRepository.save(new Turma());
+
+        var userInvalid1 = new CreateAlunoRequest(
+
+        );
     }
 
     @Test

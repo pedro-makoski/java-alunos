@@ -8,6 +8,7 @@ import io.swagger.v3.oas.annotations.security.SecurityRequirement;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 @RestController
@@ -18,6 +19,7 @@ public class UserController {
     private LoginService loginService;
 
     @PostMapping("/login")
+    @Transactional
     public ResponseEntity<LoginResponse> login(
             @RequestBody LoginRequest loginRequest
     ) {
@@ -25,6 +27,7 @@ public class UserController {
     }
 
     @PostMapping("/create-account")
+    @Transactional
     public ResponseEntity<LoginResponse> createAccount(
             @RequestBody CreateAccountRequest createAccountRequest) {
         return loginService.createAccount(createAccountRequest);
