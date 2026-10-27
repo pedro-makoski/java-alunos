@@ -1,10 +1,15 @@
 package com.alunos.scholl.domain.aluno;
 
 import com.alunos.scholl.TestUtils;
+import com.alunos.scholl.domain.PageMock;
 import com.alunos.scholl.domain.aluno.dto.request.CreateAlunoRequest;
+import com.alunos.scholl.domain.aluno.dto.response.AlunoSample;
+import com.alunos.scholl.domain.aluno.dto.response.CreateAlunoResponse;
 import com.alunos.scholl.domain.turma.model.Turma;
 import com.alunos.scholl.domain.turma.repositories.TurmaRepository;
-import com.alunos.scholl.domain.user.dtos.request.CreateAccountRequest;
+import com.alunos.scholl.domain.user.service.GetUserOnRequest;
+import com.alunos.scholl.infra.security.Authorities;
+import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -12,9 +17,21 @@ import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.data.domain.Page;
+import org.springframework.data.domain.PageImpl;
+import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
+import org.springframework.test.web.servlet.result.MockMvcResultHandlers;
+
+import java.io.IOException;
+import java.time.LocalDate;
+import java.util.ArrayList;
+import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,7 +39,6 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc
 @AutoConfigureJsonTesters
 @ActiveProfiles("test")
-@WithMockUser
 class AlunoControllerTest {
 
     @Autowired
@@ -31,43 +47,260 @@ class AlunoControllerTest {
     @Autowired
     private TestUtils testUtils;
 
-    private JacksonTester<CreateAccountRequest> createAlunoRequest;
+    @Autowired
+    private JacksonTester<CreateAlunoRequest> createAlunoRequest;
+
+    @MockitoBean
+    GetUserOnRequest getUserOnRequest;
+
+    @Autowired
+    private JacksonTester<CreateAlunoResponse> createAlunoResponseJacksonTester;
+
+    @Autowired
+    private JacksonTester<PageMock<AlunoSample>>  alunoSampleListJson;
 
     @Autowired
     private TurmaRepository turmaRepository;
 
     @Test
     @DisplayName("Validar se não aceita envios inválidos")
-    void createInvalid() {
+    @WithMockUser(authorities = "DONO")
+    void createInvalid() throws Exception {
         var user = testUtils.addUserOnRequest();
 
-        var turmaBase = turmaRepository.save(new Turma());
+        var turmaBase = turmaRepository.save(Turma.builder()
+                .dono(user)
+                .build());
 
-        var userInvalid1 = new CreateAlunoRequest(
+        var userInvalid1 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "",
+                LocalDate.now().minusYears(20),
+                "PAI",
+                "MÃE"
+        )).getJson();
 
-        );
+        var userInvalid2 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().plusYears(30),
+                "PAI",
+                "MÃE"
+        )).getJson();
+
+        var userInvalid3 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "",
+                ""
+        )).getJson();
+
+        var users = List.of(userInvalid1, userInvalid2, userInvalid3);
+
+        users.forEach(u -> {
+            try {
+                var res = mockMvc.perform(MockMvcRequestBuilders.post("/aluno/create")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(u))
+                        .andReturn().getResponse();
+
+                Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), res.getStatus());
+            } catch (Exception e) {
+                fail("O teste falhou com a exceção: " + e.getMessage());
+            }
+        });
     }
 
     @Test
     @DisplayName("Validar se não aceita envios nulos")
-    void createInvalid2() {
+    @WithMockUser(authorities = "DONO")
+    void createInvalid2() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turmaBase = turmaRepository.save(Turma.builder()
+                .dono(user)
+                .build());
+
+        var userInvalid1 = createAlunoRequest.write(new CreateAlunoRequest(
+                null,
+                "aaaaaa",
+                LocalDate.now().minusYears(20),
+                "PAI",
+                "MÃE"
+        )).getJson();
+
+        var userInvalid2 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                null,
+                LocalDate.now().minusYears(30),
+                "PAI",
+                "MÃE"
+        )).getJson();
+
+        var userInvalid3 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                null,
+                "aaa",
+                "bbb"
+        )).getJson();
+
+        var userInvalid4 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                null,
+                "aaa"
+        )).getJson();
+
+        var userInvalid5 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                null
+        )).getJson();
+
+        var users = List.of(userInvalid1, userInvalid2, userInvalid3, userInvalid4, userInvalid5);
+
+        users.forEach(u -> {
+            try {
+                var res = mockMvc.perform(MockMvcRequestBuilders.post("/aluno/create")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(u))
+                        .andReturn().getResponse();
+
+                Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), res.getStatus());
+            } catch (Exception e) {
+                fail("O teste falhou com a exceção: " + e.getMessage());
+            }
+        });
     }
 
     @Test
     @DisplayName("Validar se envia e o objeto está enviado")
-    void createValid() {
+    @WithMockUser(authorities = "DONO")
+    void createValid() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turmaBase = turmaRepository.save(Turma.builder()
+                .dono(user)
+                .build());
+
+        var userValid = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                "ccc"
+        )).getJson();
+
+        var res = mockMvc.perform(MockMvcRequestBuilders.post("/aluno/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(userValid))
+                .andDo(MockMvcResultHandlers.print())
+                .andReturn().getResponse();
+
+        Assertions.assertEquals(HttpStatus.CREATED.value(), res.getStatus());
+
     }
 
 
     @Test
     @DisplayName("Envia um conjunto de alunos válidos e inválidos e verifica se eles" +
             "se os válidos são retornados")
-    void getMyAlunos() {
-    }
+    @WithMockUser(authorities = "DONO")
+    void getMyAlunos() throws Exception{
+        var user = testUtils.addUserOnRequest();
 
-    @Test
-    @DisplayName("Envia um aluno inválido e espera retorna not found")
-    void getAlunoInvalidById() {
+        var turmaBase = turmaRepository.save(Turma.builder()
+                .dono(user)
+                .build());
+
+        var userInvalid1 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "",
+                LocalDate.now().minusYears(20),
+                "PAI",
+                "MÃE"
+        )).getJson();
+
+        var userInvalid2 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().plusYears(30),
+                "PAI",
+                "MÃE"
+        )).getJson();
+
+        var userValid1 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                "ccc"
+        )).getJson();
+
+        var userValid2 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                "ccc"
+        )).getJson();
+
+        var userValid3 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                "ccc"
+        )).getJson();
+
+        var userValid4 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                "ccc"
+        )).getJson();
+
+        var userInvalid3 = createAlunoRequest.write(new CreateAlunoRequest(
+                turmaBase.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "",
+                ""
+        )).getJson();
+
+        var alunosInvalidos = List.of(userInvalid1, userInvalid2, userInvalid3);
+        var alunosValido = List.of(userValid1, userValid2, userValid3, userValid4);
+        List<String> alunos = new ArrayList<>(alunosValido);
+
+        alunos.addAll(alunosInvalidos);
+
+        alunos.forEach(a -> {
+            try {
+                mockMvc.perform(MockMvcRequestBuilders.post("/aluno/create")
+                                .contentType(MediaType.APPLICATION_JSON)
+                                .content(a))
+                        .andReturn().getResponse();
+            } catch (Exception e) {
+                fail("O teste falhou com a exceção: " + e.getMessage());
+            }
+        });
+
+        var alunosResponse = mockMvc.perform(
+                MockMvcRequestBuilders.get("/aluno"))
+                .andReturn().getResponse();
+
+
+        var response = alunoSampleListJson.parseObject(alunosResponse.getContentAsString());
+
+        Assertions.assertEquals(HttpStatus.OK.value(), alunosResponse.getStatus());
+        Assertions.assertEquals(alunosValido.size(), response.totalElements());
+
     }
 
     @Test

@@ -15,6 +15,7 @@ import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.stereotype.Component;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
 import java.time.LocalDate;
 import java.util.Random;
@@ -26,7 +27,7 @@ public class TestUtils {
     public final int MIN_AGE = 20;
     public final int MAX_AGE = 50;
 
-    @Mock
+    @Autowired
     GetUserOnRequest getUserOnRequest;
 
     @Autowired

@@ -116,6 +116,8 @@ public class GlobalExceptionHandler {
 
     @ExceptionHandler(RuntimeException.class)
     public ResponseEntity<ExceptionDto> notFoundException(Exception ex) {
+        ex.printStackTrace();
+
         return ResponseEntity
                 .internalServerError()
                 .body(new ExceptionDto(
