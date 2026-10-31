@@ -337,13 +337,68 @@ class AlunoControllerTest {
     @Test
     @DisplayName("Envia um aluno válido de um professor " +
             "e espera retorno como encontrado ")
-    void getAlunoValidByIdOnTeacher() {
+    @WithMockUser(authorities = "DONO")
+    void getAlunoValidByIdOnTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+
+        var alunoDto = new CreateAlunoRequest(
+                turma.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                "ccc"
+        );
+
+        var aluno = alunoCreatorMocks.createAluno(alunoDto);
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+        materiaCreatorMocks.createRandomMateria(turma.getId(), professor.professorId());
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var alunoGet = mockMvc.perform(
+                MockMvcRequestBuilders.get(String.format("/aluno/%s", aluno.idAluno()))
+        ).andReturn().getResponse();
+
+        var alunoGetDto = alunoSampleJacksonTester.parseObject(alunoGet.getContentAsString());
+
+        Assertions.assertEquals(alunoDto.nome(), alunoGetDto.nome());
+        Assertions.assertEquals(alunoDto.nomeMae(), alunoGetDto.nomeMae());
+        Assertions.assertEquals(alunoDto.nomePai(), alunoGetDto.nomePai());
+        Assertions.assertEquals(alunoDto.dataNascimento(), alunoGetDto.dataNascimento());
     }
 
     @Test
     @DisplayName("Envia um aluno válido que não é do professor " +
             "e espera retorno como não encontrado ")
-    void getAlunoValidByIdOnNotTeacher() {
+    @WithMockUser(authorities = "DONO")
+    void getAlunoValidByIdOnNotTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+
+        var alunoDto = new CreateAlunoRequest(
+                turma.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                "ccc"
+        );
+
+        var aluno = alunoCreatorMocks.createAluno(alunoDto);
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var alunoGet = mockMvc.perform(
+                MockMvcRequestBuilders.get(String.format("/aluno/%s", aluno.idAluno()))
+        ).andReturn().getResponse();
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), alunoGet.getStatus());
     }
 
     @Test
