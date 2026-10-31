@@ -82,6 +82,11 @@ public class AlunoCreatorMocks {
         return createAlunoResponseJacksonTester.parseObject(alunoResponse.getContentAsString());
     }
 
+    public CreateAlunoResponse createAluno(CreateAlunoRequest createAlunoRequest)
+            throws Exception {
+        return createAlunoResponseJacksonTester.parseObject(sendAlunoRequest(createAlunoRequest).getContentAsString());
+    }
+
     public MockHttpServletResponse sendAlunoRequest(CreateAlunoRequest createAlunoRequestVar) {
         try {
             return mockMvc.perform(MockMvcRequestBuilders.post("/aluno/create")

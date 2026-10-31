@@ -69,6 +69,9 @@ class AlunoControllerTest {
     @Autowired
     private ProfessorCreatorMocks professorCreatorMocks;
 
+    @Autowired
+    private JacksonTester<AlunoSample> alunoSampleJacksonTester;
+
     @Test
     @DisplayName("Validar se não aceita envios inválidos")
     @WithMockUser(authorities = "DONO")
@@ -303,7 +306,32 @@ class AlunoControllerTest {
 
     @Test
     @DisplayName("Envia um aluno válidos e espera retorno com os dados corretos")
-    void getAlunoValidById() {
+    @WithMockUser(authorities = "DONO")
+    void getAlunoValidById() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+
+        var alunoDto = new CreateAlunoRequest(
+                turma.getId(),
+                "aaaaa",
+                LocalDate.now().minusYears(30),
+                "bbb",
+                "ccc"
+        );
+
+        var aluno = alunoCreatorMocks.createAluno(alunoDto);
+
+        var alunoGet = mockMvc.perform(
+                MockMvcRequestBuilders.get(String.format("/aluno/%s", aluno.idAluno()))
+        ).andReturn().getResponse();
+
+        var alunoGetDto = alunoSampleJacksonTester.parseObject(alunoGet.getContentAsString());
+
+        Assertions.assertEquals(alunoDto.nome(), alunoGetDto.nome());
+        Assertions.assertEquals(alunoDto.nomeMae(), alunoGetDto.nomeMae());
+        Assertions.assertEquals(alunoDto.nomePai(), alunoGetDto.nomePai());
+        Assertions.assertEquals(alunoDto.dataNascimento(), alunoGetDto.dataNascimento());
     }
 
     @Test
