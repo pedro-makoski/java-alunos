@@ -1,12 +1,17 @@
 package com.alunos.scholl.domain.periodo;
 
 import com.alunos.scholl.TestUtils;
+import com.alunos.scholl.domain.creatorMocks.AlunoCreatorMocks;
+import com.alunos.scholl.domain.creatorMocks.MateriaCreatorMocks;
+import com.alunos.scholl.domain.creatorMocks.ProfessorCreatorMocks;
+import com.alunos.scholl.domain.creatorMocks.TurmaCreatorMocks;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.context.SpringBootTest;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
+import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.web.servlet.MockMvc;
@@ -18,6 +23,13 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureJsonTesters
 @ActiveProfiles("test")
 @WithMockUser
+@Import({
+        AlunoCreatorMocks.class,
+        TurmaCreatorMocks.class,
+        MateriaCreatorMocks.class,
+        ProfessorCreatorMocks.class,
+        TestUtils.class
+})
 class PeriodoControllerTest {
 
     @Autowired

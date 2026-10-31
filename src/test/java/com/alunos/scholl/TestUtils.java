@@ -1,5 +1,6 @@
 package com.alunos.scholl;
 
+import com.alunos.scholl.domain.materia.dto.response.CreateMateriaResponse;
 import com.alunos.scholl.domain.professor.dto.request.CreateProfessorRequest;
 import com.alunos.scholl.domain.professor.model.Professor;
 import com.alunos.scholl.domain.professor.repositories.ProfessorRepository;
@@ -14,6 +15,7 @@ import org.mockito.Mock;
 import org.mockito.Mockito;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
+import org.springframework.boot.test.context.TestConfiguration;
 import org.springframework.stereotype.Component;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 
@@ -22,6 +24,7 @@ import java.util.Random;
 import java.util.UUID;
 
 @Component
+@TestConfiguration
 public class TestUtils {
 
     public final int MIN_AGE = 20;
@@ -34,17 +37,14 @@ public class TestUtils {
     LoginService loginService;
 
     @Autowired
-    ProfessorService professorService;
+    private ProfessorRepository professorRepository;
 
     @Autowired
     private UserRepository userRepository;
 
-    @Autowired
-    private ProfessorRepository professorRepository;
-
     public User addUserOnRequest() {
         var res = loginService.createAccount(new CreateAccountRequest(
-                String.format("email-random-%s@email.com", UUID.randomUUID().toString()),
+                getRandomEmail(),
                 UUID.randomUUID().toString(),
                 getRandomDate(),
                 getNome(),
@@ -60,18 +60,8 @@ public class TestUtils {
         return user;
     }
 
-    public Professor addProfessorOnRequest() {
-        addUserOnRequest();
-
-        var res = professorService.createProfessor(new CreateProfessorRequest(
-                String.format("email-random-%s@email.com", UUID.randomUUID().toString()),
-                UUID.randomUUID().toString(),
-                getNome(),
-                "Usuário Sobrenome",
-                getRandomDate()
-        ), null);
-
-        var professor = professorRepository.findById(res.getBody().professorId()).get();
+    public Professor addProfessorOnRequest(UUID professorId) {
+        var professor = professorRepository.findById(professorId).get();
 
         Mockito.when(getUserOnRequest.realizeWithThrow(
                         Mockito.nullable(HttpServletRequest.class)))
@@ -80,8 +70,6 @@ public class TestUtils {
 
         return professor;
     }
-
-
 
     public LocalDate getRandomDate() {
         Random random = new Random();
@@ -92,4 +80,8 @@ public class TestUtils {
     public String getNome() {
         return "Usuário Nome";
     }
+
+    public String getRandomNome() {return UUID.randomUUID().toString();}
+
+    public String getRandomEmail() {return UUID.randomUUID().toString()+"@email.com";}
 }

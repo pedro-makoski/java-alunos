@@ -16,21 +16,19 @@ public interface AlunoRepository extends JpaRepository<Aluno, UUID> {
 
     @Query("""
         SELECT DISTINCT a FROM Aluno a
-        LEFT JOIN Materia m
         JOIN a.turma at
+        LEFT JOIN Materia m ON m.turma = at
             
         WHERE m.professor.id = :id
-        AND m.turma = at
     """)
     Page<Aluno> findByProfessorId(UUID id, Pageable pageable);
 
     @Query("""
         SELECT DISTINCT a FROM Aluno a
-        LEFT JOIN Materia m
         JOIN a.turma at
-            
+        LEFT JOIN Materia m ON m.turma = at
+           
         WHERE m.professor.id = :professorId
-        AND m.turma = at
         AND a.id = :alunoId
     """)
     Optional<Aluno> findByAlunoForTeacher(UUID alunoId, UUID professorId);
