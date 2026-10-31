@@ -4,12 +4,15 @@ import com.alunos.scholl.TestUtils;
 import com.alunos.scholl.domain.PageMock;
 import com.alunos.scholl.domain.aluno.dto.request.CreateAlunoRequest;
 import com.alunos.scholl.domain.aluno.dto.response.AlunoSample;
+import com.alunos.scholl.domain.aluno.repositories.AlunoRepository;
 import com.alunos.scholl.domain.creatorMocks.AlunoCreatorMocks;
 import com.alunos.scholl.domain.creatorMocks.MateriaCreatorMocks;
 import com.alunos.scholl.domain.creatorMocks.ProfessorCreatorMocks;
 import com.alunos.scholl.domain.creatorMocks.TurmaCreatorMocks;
 
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.PersistenceContext;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
@@ -43,6 +46,7 @@ import java.util.List;
         ProfessorCreatorMocks.class,
         TestUtils.class
 })
+@WithMockUser(authorities = "DONO")
 class AlunoControllerTest {
 
     @Autowired
@@ -70,11 +74,16 @@ class AlunoControllerTest {
     private ProfessorCreatorMocks professorCreatorMocks;
 
     @Autowired
+    private AlunoRepository alunoRepository;
+
+    @Autowired
     private JacksonTester<AlunoSample> alunoSampleJacksonTester;
+
+    @PersistenceContext
+    EntityManager entityManager;
 
     @Test
     @DisplayName("Validar se não aceita envios inválidos")
-    @WithMockUser(authorities = "DONO")
     void createInvalid() throws Exception {
         var user = testUtils.addUserOnRequest();
         var turmaBase = turmaCreatorMocks.createTurmaRandom(user);
@@ -110,7 +119,6 @@ class AlunoControllerTest {
 
     @Test
     @DisplayName("Validar se não aceita envios nulos")
-    @WithMockUser(authorities = "DONO")
     void createInvalid2() throws Exception {
         var user = testUtils.addUserOnRequest();
         var turmaBase = turmaCreatorMocks.createTurmaRandom(user);
@@ -162,7 +170,6 @@ class AlunoControllerTest {
 
     @Test
     @DisplayName("Validar se envia e o objeto está enviado")
-    @WithMockUser(authorities = "DONO")
     void createValid() throws Exception {
         var user = testUtils.addUserOnRequest();
 
@@ -186,7 +193,6 @@ class AlunoControllerTest {
     @Test
     @DisplayName("Envia um conjunto de alunos válidos e inválidos e verifica se eles" +
             "se os válidos são retornados")
-    @WithMockUser(authorities = "DONO")
     void getMyAlunos() throws Exception{
         var user = testUtils.addUserOnRequest();
 
@@ -272,7 +278,6 @@ class AlunoControllerTest {
     @Test
     @DisplayName("Envia um conjunto de alunos válidos de um professor e de um que não é" +
             "e valida de se retorna os do professor")
-    @WithMockUser(authorities = "DONO")
     void getMyAlunosByTeacher() throws Exception {
         var user = testUtils.addUserOnRequest();
 
@@ -306,7 +311,6 @@ class AlunoControllerTest {
 
     @Test
     @DisplayName("Envia um aluno válidos e espera retorno com os dados corretos")
-    @WithMockUser(authorities = "DONO")
     void getAlunoValidById() throws Exception {
         var user = testUtils.addUserOnRequest();
 
@@ -337,7 +341,6 @@ class AlunoControllerTest {
     @Test
     @DisplayName("Envia um aluno válido de um professor " +
             "e espera retorno como encontrado ")
-    @WithMockUser(authorities = "DONO")
     void getAlunoValidByIdOnTeacher() throws Exception {
         var user = testUtils.addUserOnRequest();
 
@@ -374,7 +377,6 @@ class AlunoControllerTest {
     @Test
     @DisplayName("Envia um aluno válido que não é do professor " +
             "e espera retorno como não encontrado ")
-    @WithMockUser(authorities = "DONO")
     void getAlunoValidByIdOnNotTeacher() throws Exception {
         var user = testUtils.addUserOnRequest();
 
@@ -403,7 +405,22 @@ class AlunoControllerTest {
 
     @Test
     @DisplayName("Altera a turma do aluno e verifica a turma deles")
-    void updateAlunoTurma() {
+    void updateAlunoTurma() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var aluno = alunoCreatorMocks.createAlunoRandom(user);
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+
+        var response = mockMvc.perform(
+                MockMvcRequestBuilders.patch("/aluno/turma/change")
+                        .queryParam("alunoId", aluno.idAluno().toString())
+                        .queryParam("turmaId", turma.getId().toString())
+        ).andReturn().getResponse();
+
+        var alunoGetRepository = alunoRepository.getReferenceById(aluno.idAluno());
+
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatus());
+        Assertions.assertEquals(turma.getId(), alunoGetRepository.getTurma().getId());
     }
 
     @Test
