@@ -15,14 +15,14 @@ public interface TurmaRepository extends JpaRepository<Turma, UUID> {
 
     @Query("""
         SELECT DISTINCT t FROM Materia m
-        LEFT JOIN m.turma
+        JOIN m.turma t
         WHERE m.professor.id = :id
     """)
     Page<Turma> findByTeacherId(UUID id, Pageable pageable);
 
     @Query("""
         SELECT DISTINCT t FROM Materia m
-        LEFT JOIN m.turma t
+        JOIN m.turma t
         WHERE m.professor.id = :professorId
         AND t.id = :turmaId
     """)
