@@ -18,12 +18,11 @@ public interface PeriodoRepository extends JpaRepository<Periodo, UUID> {
         JOIN tp.turmaPeriodoId tpi
         JOIN tpi.periodo p
         JOIN tpi.turma t
-        LEFT JOIN Materia m
+        LEFT JOIN Materia m on m.turma = t
         JOIN m.professor prof
         JOIN m.turma turma
             
         WHERE prof.id = :profId
-        AND m.turma = t
             
     """)
     Page<Periodo> findByProfessorId(UUID id, PageRequest of);
@@ -33,12 +32,11 @@ public interface PeriodoRepository extends JpaRepository<Periodo, UUID> {
         JOIN tp.turmaPeriodoId tpi
         JOIN tpi.periodo p
         JOIN tpi.turma t
-        LEFT JOIN Materia m
+        LEFT JOIN Materia m ON m.turma = t
         JOIN m.professor prof
         JOIN m.turma turma
             
         WHERE prof.id = :professorId
-        AND m.turma = t
         AND p.id = :periodoId
     """)
     Optional<Periodo> findByPeriodoIdAndProfessorId(UUID periodoId, UUID professorId);

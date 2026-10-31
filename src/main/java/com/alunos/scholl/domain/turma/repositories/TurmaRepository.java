@@ -15,7 +15,7 @@ public interface TurmaRepository extends JpaRepository<Turma, UUID> {
 
     @Query("""
         SELECT DISTINCT t FROM Materia m
-        LEFT JOIN m.turma t
+        LEFT JOIN m.turma
         WHERE m.professor.id = :id
     """)
     Page<Turma> findByTeacherId(UUID id, Pageable pageable);

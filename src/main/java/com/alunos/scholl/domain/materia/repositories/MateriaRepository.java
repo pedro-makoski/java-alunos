@@ -19,10 +19,9 @@ public interface MateriaRepository extends JpaRepository<Materia, UUID> {
     @Query("""
         SELECT m FROM Materia m
         JOIN m.turma t
-        LEFT JOIN Aluno a
+        LEFT JOIN Aluno a ON a.id = :alunoId
         
-        WHERE a.id = :alunoId
-        AND t = a.turma
+        WHERE t = a.turma
     """)
     Page<Materia> findMateriasOfAluno(UUID alunoId, PageRequest of);
 
