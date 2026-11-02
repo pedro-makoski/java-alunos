@@ -12,8 +12,7 @@ public record AddNotaRequest(
         @DecimalMax(value = "100.00", message = "A nota não pode ser maior que 100")
         Double nota,
 
-        @Valid
-        List<DetailsNota> detailsNota,
+        List<@Valid DetailsNota> detailsNota,
 
         UUID idAluno,
         UUID idPeriodo,

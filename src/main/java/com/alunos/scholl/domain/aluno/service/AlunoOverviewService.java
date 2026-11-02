@@ -39,7 +39,7 @@ public class AlunoOverviewService {
 
         var aluno = permissionValidationAndGet.validateAndGetAluno(idAluno, user);
 
-        var notas = notaAlunoRepository.findByNotaAlunoIdAluno(idAluno);
+        var notas = notaAlunoRepository.findByNotaAlunoIdAlunoId(idAluno);
 
         if(notas.isEmpty()) {
             throw new NoAlunoFound();
@@ -51,6 +51,8 @@ public class AlunoOverviewService {
                 .mapToDouble(Double::doubleValue)
                 .average()
                 .orElse(0.0);
+
+        System.out.println(media);
 
         Map<String, Double> notasRelation = notas
                 .stream()

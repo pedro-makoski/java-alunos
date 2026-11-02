@@ -37,7 +37,7 @@ public class SecurityConfiguration {
                             "/user/deslogin", "/turma", "/aluno",
                              "/periodo", "/materia",
                              "/aluno/{id}", "/materia/{id}", "/turma/{id}",
-                             "/periodo/{id}"
+                             "/periodo/{id}", "/aluno/nota-aluno/details"
                      ).authenticated()
                 )
                 .addFilterBefore(securityFilter, UsernamePasswordAuthenticationFilter.class)

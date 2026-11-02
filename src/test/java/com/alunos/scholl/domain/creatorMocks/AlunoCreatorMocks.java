@@ -67,7 +67,7 @@ public class AlunoCreatorMocks {
     }
 
 
-    private CreateAlunoResponse createAlunoRandom(User user, UUID turmaId) throws Exception {
+    public CreateAlunoResponse createAlunoRandom(User user, UUID turmaId) throws Exception {
 
         var aluno = new CreateAlunoRequest(
                 turmaId,
@@ -80,6 +80,11 @@ public class AlunoCreatorMocks {
         var alunoResponse = sendAlunoRequest(aluno);
 
         return createAlunoResponseJacksonTester.parseObject(alunoResponse.getContentAsString());
+    }
+
+    public CreateAlunoResponse createAluno(CreateAlunoRequest createAlunoRequest)
+            throws Exception {
+        return createAlunoResponseJacksonTester.parseObject(sendAlunoRequest(createAlunoRequest).getContentAsString());
     }
 
     public MockHttpServletResponse sendAlunoRequest(CreateAlunoRequest createAlunoRequestVar) {

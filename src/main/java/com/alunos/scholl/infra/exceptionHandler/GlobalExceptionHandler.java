@@ -115,7 +115,7 @@ public class GlobalExceptionHandler {
     }
 
     @ExceptionHandler(RuntimeException.class)
-    public ResponseEntity<ExceptionDto> notFoundException(Exception ex) {
+    public ResponseEntity<ExceptionDto> runtimeException(Exception ex) {
         ex.printStackTrace();
 
         return ResponseEntity
