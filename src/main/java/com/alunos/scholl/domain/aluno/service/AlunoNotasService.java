@@ -71,6 +71,8 @@ public class AlunoNotasService {
         nota.setNota(addNotaRequest.nota());
         nota.setDetails(addNotaRequest.detailsNota());
 
+        notaAlunoRepository.save(nota);
+
         return ResponseEntity
                 .noContent()
                 .build();

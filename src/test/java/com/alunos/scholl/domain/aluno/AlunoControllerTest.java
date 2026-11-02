@@ -2,13 +2,14 @@ package com.alunos.scholl.domain.aluno;
 
 import com.alunos.scholl.TestUtils;
 import com.alunos.scholl.domain.PageMock;
+import com.alunos.scholl.domain.aluno.dto.request.AddNotaRequest;
 import com.alunos.scholl.domain.aluno.dto.request.CreateAlunoRequest;
+import com.alunos.scholl.domain.aluno.dto.response.AlunoDetails;
 import com.alunos.scholl.domain.aluno.dto.response.AlunoSample;
+import com.alunos.scholl.domain.aluno.dto.response.GetNotaAlunoResponse;
+import com.alunos.scholl.domain.aluno.model.DetailsNota;
 import com.alunos.scholl.domain.aluno.repositories.AlunoRepository;
-import com.alunos.scholl.domain.creatorMocks.AlunoCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.MateriaCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.ProfessorCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.TurmaCreatorMocks;
+import com.alunos.scholl.domain.creatorMocks.*;
 
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import jakarta.persistence.EntityManager;
@@ -23,6 +24,8 @@ import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
+import org.springframework.http.MediaType;
+import org.springframework.mock.web.MockHttpServletResponse;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
@@ -32,7 +35,9 @@ import org.springframework.transaction.annotation.Transactional;
 
 import java.time.LocalDate;
 import java.util.ArrayList;
+import java.util.HashMap;
 import java.util.List;
+import java.util.UUID;
 
 @SpringBootTest
 @AutoConfigureMockMvc
@@ -44,6 +49,7 @@ import java.util.List;
         TurmaCreatorMocks.class,
         MateriaCreatorMocks.class,
         ProfessorCreatorMocks.class,
+        PeriodoCreatorMocks.class,
         TestUtils.class
 })
 @WithMockUser(authorities = "DONO")
@@ -78,6 +84,18 @@ class AlunoControllerTest {
 
     @Autowired
     private JacksonTester<AlunoSample> alunoSampleJacksonTester;
+
+    @Autowired
+    private JacksonTester<AddNotaRequest> addNotaRequestJacksonTester;
+
+    @Autowired
+    private PeriodoCreatorMocks periodoCreatorMocks;
+
+    @Autowired
+    private JacksonTester<GetNotaAlunoResponse> getNotaAlunoResponseJacksonTester;
+
+    @Autowired
+    private JacksonTester<AlunoDetails> alunoDetailsJacksonTester;
 
     @PersistenceContext
     EntityManager entityManager;
@@ -411,6 +429,9 @@ class AlunoControllerTest {
         var aluno = alunoCreatorMocks.createAlunoRandom(user);
         var turma = turmaCreatorMocks.createTurmaRandom(user);
 
+        var alunoTurmaBefore = alunoRepository
+                    .getReferenceById(aluno.idAluno()).getTurma().getId();
+
         var response = mockMvc.perform(
                 MockMvcRequestBuilders.patch("/aluno/turma/change")
                         .queryParam("alunoId", aluno.idAluno().toString())
@@ -421,31 +442,155 @@ class AlunoControllerTest {
 
         Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatus());
         Assertions.assertEquals(turma.getId(), alunoGetRepository.getTurma().getId());
+        Assertions.assertNotEquals(alunoTurmaBefore, alunoGetRepository.getTurma().getId());
     }
 
     @Test
     @DisplayName("Envia um ID que não existe de um aluno e verifica se retorna erro")
-    void updateAlunoTurmaInvalid() {
-    }
+    void updateAlunoTurmaInvalid() throws Exception {
+        var user = testUtils.addUserOnRequest();
 
-    @Test
-    @DisplayName("Envia um ID que não existe de uma matéria e verifica se retorna erro")
-    void updateAlunoTurmaInvalid2() {
+        var aluno = alunoCreatorMocks.createAlunoRandom(user);
+
+        var alunoTurmaBefore = alunoRepository.getReferenceById(aluno.idAluno()).getTurma().getId();
+
+        var response = mockMvc.perform(
+                MockMvcRequestBuilders.patch("/aluno/turma/change")
+                        .queryParam("alunoId", aluno.idAluno().toString())
+                        .queryParam("turmaId", UUID.randomUUID().toString())
+        ).andReturn().getResponse();
+
+        var alunoNow = alunoRepository.getReferenceById(aluno.idAluno());
+
+        var alunoTurmaNow = alunoNow.getTurma().getId();
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), response.getStatus());
+        Assertions.assertEquals(alunoTurmaBefore, alunoTurmaNow);
     }
 
     @Test
     @DisplayName("Cria aluno e adiciona notas com dados válidos e inválidos " +
             "e verifica se retorna corretamente")
-    void getAlunoDetails() {
+    void getAlunoDetailsAndNota() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var aluno = alunoCreatorMocks.createAlunoRandom(user, turma.getId());
+
+        var materia = materiaCreatorMocks
+                .createRandomMateria(turma.getId(), professor.professorId());
+
+        var perido = periodoCreatorMocks.
+                createRandomPeriodo();
+
+        var periodo2 = periodoCreatorMocks.createRandomPeriodo();
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        Double NOTA_VALID_1 = 50.2;
+        Double NOTA_VALID_2 = 40.3;
+
+        var notaMedia = (NOTA_VALID_1+NOTA_VALID_2)/2;
+
+        var notaValid1 = createNota(new AddNotaRequest(
+                                        NOTA_VALID_1,
+                                        List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
+                                        aluno.idAluno(),
+                                        perido.idPeriodo(),
+                                        materia.materiaId()
+                                ));
+
+        var notaValid2 = createNota(new AddNotaRequest(
+                NOTA_VALID_2,
+                List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
+                aluno.idAluno(),
+                periodo2.idPeriodo(),
+                materia.materiaId()
+        ));
+
+        var notaInvalid1 = createNota(new AddNotaRequest(
+                                        -50.0,
+                                        List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
+                                        aluno.idAluno(),
+                                        perido.idPeriodo(),
+                                        materia.materiaId()
+                                ));
+
+        var notaInvalid2 = createNota(new AddNotaRequest(
+                100.5,
+                List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
+                aluno.idAluno(),
+                perido.idPeriodo(),
+                materia.materiaId()
+        ));
+
+        var professor2 = professorCreatorMocks.createRandomProfessor();
+
+        testUtils.addProfessorOnRequest(professor2.professorId());
+
+        var notaForbidden = createNota(new AddNotaRequest(
+                50.2,
+                List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
+                aluno.idAluno(),
+                perido.idPeriodo(),
+                materia.materiaId()
+        ));
+
+        var notaGetResultForbidden = mockMvc.perform(
+                MockMvcRequestBuilders.get("/aluno/nota-aluno/details")
+                        .queryParam("idAluno", aluno.idAluno().toString())
+                        .queryParam("idMateria", materia.materiaId().toString())
+                        .queryParam("idPeriodo", perido.idPeriodo().toString())
+        ).andReturn().getResponse();
+
+        var notaOverviewForbidden = mockMvc.perform(
+                MockMvcRequestBuilders.get("/aluno/overview/{id}", aluno.idAluno())
+        ).andReturn().getResponse();
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var notaGetResult = mockMvc.perform(
+                MockMvcRequestBuilders.get("/aluno/nota-aluno/details")
+                        .queryParam("idAluno", aluno.idAluno().toString())
+                        .queryParam("idMateria", materia.materiaId().toString())
+                        .queryParam("idPeriodo", perido.idPeriodo().toString())
+
+        ).andReturn().getResponse();
+
+        var notaGetResultBody = getNotaAlunoResponseJacksonTester
+                .parseObject(notaGetResult.getContentAsString());
+
+        var notaOverview = mockMvc.perform(
+                MockMvcRequestBuilders.get("/aluno/overview/{id}", aluno.idAluno())
+        ).andReturn().getResponse();
+
+        var notaOverviewBody = alunoDetailsJacksonTester
+                    .parseObject(notaOverview.getContentAsString());
+
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), notaValid1.getStatus());
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), notaValid2.getStatus());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), notaInvalid1.getStatus());
+        Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), notaInvalid2.getStatus());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), notaForbidden.getStatus());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(),
+                notaGetResultForbidden.getStatus());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(),
+                notaOverviewForbidden.getStatus());
+
+        Assertions.assertEquals(NOTA_VALID_1, notaGetResultBody.nota());
+        Assertions.assertEquals(notaMedia, notaOverviewBody.notaMedia());
+        Assertions.assertEquals(aluno.idAluno(), notaOverviewBody.idAluno());
     }
 
-    @Test
-    @DisplayName("Adiciona nota ao aluno e verifica se está correto")
-    void addNotaToAluno() {
-    }
-
-    @Test
-    @DisplayName("Adiciona nota ao aluno e verifica se foi realmente adicionado")
-    void getNotaAluno() {
+    private MockHttpServletResponse createNota(AddNotaRequest addNotaRequest)
+                throws Exception{
+        return mockMvc.perform(
+                MockMvcRequestBuilders.post("/aluno/nota-aluno/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(addNotaRequestJacksonTester
+                                .write(addNotaRequest)
+                                    .getJson())
+        ).andReturn().getResponse();
     }
 }

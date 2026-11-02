@@ -72,10 +72,10 @@ public class AlunoController {
     @GetMapping("/overview/{id}")
     @Transactional(readOnly = true)
     public AlunoDetails getAlunoDetails(
-            @PathVariable UUID idAluno,
+            @PathVariable UUID id,
             HttpServletRequest httpServletRequest
     ) {
-        return alunoOverviewService.getAlunoDetails(idAluno, httpServletRequest);
+        return alunoOverviewService.getAlunoDetails(id, httpServletRequest);
     }
 
     @PostMapping("/nota-aluno/create")
@@ -87,13 +87,13 @@ public class AlunoController {
         return alunoNotasService.addNotaToAluno(addNotaRequest, httpServletRequest);
     }
 
-    @GetMapping("/nota-aluno/post")
+    @GetMapping("/nota-aluno/details")
     @Transactional
     public GetNotaAlunoResponse getNotaAluno(
-            HttpServletRequest httpServletRequest,
             @RequestParam UUID idAluno,
             @RequestParam UUID idMateria,
-            @RequestParam UUID idPeriodo
+            @RequestParam UUID idPeriodo,
+            HttpServletRequest httpServletRequest
     ) {
         return alunoNotasService.getNotaAluno(httpServletRequest, idAluno, idMateria, idPeriodo);
     }

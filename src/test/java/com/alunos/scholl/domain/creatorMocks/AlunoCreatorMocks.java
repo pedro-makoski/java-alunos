@@ -67,7 +67,7 @@ public class AlunoCreatorMocks {
     }
 
 
-    private CreateAlunoResponse createAlunoRandom(User user, UUID turmaId) throws Exception {
+    public CreateAlunoResponse createAlunoRandom(User user, UUID turmaId) throws Exception {
 
         var aluno = new CreateAlunoRequest(
                 turmaId,

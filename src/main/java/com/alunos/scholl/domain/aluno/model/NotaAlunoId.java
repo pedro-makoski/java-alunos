@@ -44,8 +44,8 @@ public class NotaAlunoId {
         var dateEnd = periodo.getFim().format(formatador);
 
         return String.format(
-                "%s - %s de %s a %s",
-                initial, endType, dateInit, dateEnd
+                "%s - %s de %s a %s / %s",
+                initial, endType, dateInit, dateEnd, periodo.getId()
         );
     }
 }
