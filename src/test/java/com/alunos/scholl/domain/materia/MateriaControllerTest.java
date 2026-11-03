@@ -229,13 +229,58 @@ class MateriaControllerTest {
     @Test
     @DisplayName("Envia uma matéria válida de um professor " +
             "e espera retorno como encontrado ")
-    void getMateriaValidByIdOnTeacher() {
+    void getMateriaValidByIdOnTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+        var materiaDto = new CreateMateriaRequest(
+                testUtils.getRandomNome(),
+                professor.professorId(),
+                turma.getId()
+        );
+
+        var materia = materiaCreatorMocks.createMateriaConverted(materiaDto);
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var materiaGet = mockMvc.perform(
+                MockMvcRequestBuilders.get("/materia/{id}", materia.materiaId())
+        ).andReturn().getResponse();
+
+        var materiaGetDto = materiaSampleJacksonTester
+                .parseObject(materiaGet.getContentAsString());
+
+        Assertions.assertEquals(materiaDto.nome(), materiaGetDto.nome());
     }
 
     @Test
     @DisplayName("Envia uma matéria válido que não é do professor " +
             "e espera retorno como não encontrado ")
-    void getMateiraValidByIdOnNotTeacher() {
+    void getMateiraValidByIdOnNotTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+        var materiaDto = new CreateMateriaRequest(
+                testUtils.getRandomNome(),
+                professor.professorId(),
+                turma.getId()
+        );
+
+        var materia = materiaCreatorMocks.createMateriaConverted(materiaDto);
+
+        var professor2 = professorCreatorMocks.createRandomProfessor();
+
+        testUtils.addProfessorOnRequest(professor2.professorId());
+
+        var materiaGet = mockMvc.perform(
+                MockMvcRequestBuilders.get("/materia/{id}", materia.materiaId())
+        ).andReturn().getResponse();
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), materiaGet.getStatus());
     }
 
 
