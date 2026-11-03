@@ -193,7 +193,7 @@ class AlunoControllerTest {
     }
 
     @Test
-    @DisplayName("Validar se envia e o objeto está enviado")
+    @DisplayName("Validar se envia")
     void createValid() throws Exception {
         var user = testUtils.addUserOnRequest();
 
