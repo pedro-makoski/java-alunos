@@ -132,7 +132,10 @@ class AlunoControllerTest {
 
         var users = List.of(userInvalid1, userInvalid2, userInvalid3);
 
-        users.forEach(alunoCreatorMocks::sendAlunoRequest);
+        var validation = users.stream().map(alunoCreatorMocks::sendAlunoRequest).toList();
+
+        validation.forEach((v) ->
+                Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), v.getStatus()));
     }
 
     @Test
@@ -183,7 +186,10 @@ class AlunoControllerTest {
 
         var users = List.of(userInvalid1, userInvalid2, userInvalid3, userInvalid4, userInvalid5);
 
-        users.forEach(alunoCreatorMocks::sendAlunoRequest);
+        var validation = users.stream().map(alunoCreatorMocks::sendAlunoRequest).toList();
+
+        validation.forEach((v) ->
+                Assertions.assertEquals(HttpStatus.BAD_REQUEST.value(), v.getStatus()));
     }
 
     @Test
@@ -204,7 +210,6 @@ class AlunoControllerTest {
         var res = alunoCreatorMocks.sendAlunoRequest(userValid);
 
         Assertions.assertEquals(HttpStatus.CREATED.value(), res.getStatus());
-
     }
 
 
