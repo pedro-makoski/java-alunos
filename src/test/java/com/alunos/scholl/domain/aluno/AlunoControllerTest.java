@@ -86,9 +86,6 @@ class AlunoControllerTest {
     private JacksonTester<AlunoSample> alunoSampleJacksonTester;
 
     @Autowired
-    private JacksonTester<AddNotaRequest> addNotaRequestJacksonTester;
-
-    @Autowired
     private PeriodoCreatorMocks periodoCreatorMocks;
 
     @Autowired
@@ -498,7 +495,7 @@ class AlunoControllerTest {
 
         var notaMedia = (NOTA_VALID_1+NOTA_VALID_2)/2;
 
-        var notaValid1 = createNota(new AddNotaRequest(
+        var notaValid1 = alunoCreatorMocks.createNota(new AddNotaRequest(
                                         NOTA_VALID_1,
                                         List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
                                         aluno.idAluno(),
@@ -506,7 +503,7 @@ class AlunoControllerTest {
                                         materia.materiaId()
                                 ));
 
-        var notaValid2 = createNota(new AddNotaRequest(
+        var notaValid2 = alunoCreatorMocks.createNota(new AddNotaRequest(
                 NOTA_VALID_2,
                 List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
                 aluno.idAluno(),
@@ -514,7 +511,7 @@ class AlunoControllerTest {
                 materia.materiaId()
         ));
 
-        var notaInvalid1 = createNota(new AddNotaRequest(
+        var notaInvalid1 = alunoCreatorMocks.createNota(new AddNotaRequest(
                                         -50.0,
                                         List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
                                         aluno.idAluno(),
@@ -522,7 +519,7 @@ class AlunoControllerTest {
                                         materia.materiaId()
                                 ));
 
-        var notaInvalid2 = createNota(new AddNotaRequest(
+        var notaInvalid2 = alunoCreatorMocks.createNota(new AddNotaRequest(
                 100.5,
                 List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
                 aluno.idAluno(),
@@ -534,7 +531,7 @@ class AlunoControllerTest {
 
         testUtils.addProfessorOnRequest(professor2.professorId());
 
-        var notaForbidden = createNota(new AddNotaRequest(
+        var notaForbidden = alunoCreatorMocks.createNota(new AddNotaRequest(
                 50.2,
                 List.of(new DetailsNota(testUtils.getRandomNome(),50.2)),
                 aluno.idAluno(),
@@ -586,16 +583,5 @@ class AlunoControllerTest {
         Assertions.assertEquals(NOTA_VALID_1, notaGetResultBody.nota());
         Assertions.assertEquals(notaMedia, notaOverviewBody.notaMedia());
         Assertions.assertEquals(aluno.idAluno(), notaOverviewBody.idAluno());
-    }
-
-    private MockHttpServletResponse createNota(AddNotaRequest addNotaRequest)
-                throws Exception{
-        return mockMvc.perform(
-                MockMvcRequestBuilders.post("/aluno/nota-aluno/create")
-                        .contentType(MediaType.APPLICATION_JSON)
-                        .content(addNotaRequestJacksonTester
-                                .write(addNotaRequest)
-                                    .getJson())
-        ).andReturn().getResponse();
     }
 }

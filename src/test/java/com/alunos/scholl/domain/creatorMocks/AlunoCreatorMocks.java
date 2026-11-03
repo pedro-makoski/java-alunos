@@ -1,7 +1,9 @@
 package com.alunos.scholl.domain.creatorMocks;
 
 import com.alunos.scholl.TestUtils;
+import com.alunos.scholl.domain.aluno.dto.request.AddNotaRequest;
 import com.alunos.scholl.domain.aluno.dto.request.CreateAlunoRequest;
+import com.alunos.scholl.domain.aluno.dto.response.AlunoSample;
 import com.alunos.scholl.domain.aluno.dto.response.CreateAlunoResponse;
 import com.alunos.scholl.domain.user.model.User;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -38,6 +40,9 @@ public class AlunoCreatorMocks {
 
     @Autowired
     private TurmaCreatorMocks turmaCreatorMocks;
+
+    @Autowired
+    private JacksonTester<AddNotaRequest> addNotaRequestJacksonTester;
 
     public CreateAlunoResponse createAlunoRandom(User user) throws Exception {
         var turma = turmaCreatorMocks.createTurmaRandom(user);
@@ -82,6 +87,22 @@ public class AlunoCreatorMocks {
         return createAlunoResponseJacksonTester.parseObject(alunoResponse.getContentAsString());
     }
 
+    public AlunoSample createAlunoRandomAndReturnDto(User user, UUID turmaId) throws Exception {
+
+        var aluno = new CreateAlunoRequest(
+                turmaId,
+                testUtils.getRandomNome(),
+                testUtils.getRandomDate(),
+                testUtils.getNome(),
+                testUtils.getRandomNome()
+        );
+
+        var alunoResponse = sendAlunoRequest(aluno);
+        var result = createAlunoResponseJacksonTester.parseObject(alunoResponse.getContentAsString());
+
+        return new AlunoSample(aluno, result.idAluno());
+    }
+
     public CreateAlunoResponse createAluno(CreateAlunoRequest createAlunoRequest)
             throws Exception {
         return createAlunoResponseJacksonTester.parseObject(sendAlunoRequest(createAlunoRequest).getContentAsString());
@@ -97,5 +118,16 @@ public class AlunoCreatorMocks {
             fail("Erro ao enviar req: " + e.getMessage());
             return null;
         }
+    }
+
+    public MockHttpServletResponse createNota(AddNotaRequest addNotaRequest)
+            throws Exception{
+        return mockMvc.perform(
+                MockMvcRequestBuilders.post("/aluno/nota-aluno/create")
+                        .contentType(MediaType.APPLICATION_JSON)
+                        .content(addNotaRequestJacksonTester
+                                .write(addNotaRequest)
+                                .getJson())
+        ).andReturn().getResponse();
     }
 }

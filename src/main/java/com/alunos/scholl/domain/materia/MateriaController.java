@@ -61,7 +61,7 @@ public class MateriaController {
         return materiaService.getByMateriaId(id, request);
     }
 
-    @GetMapping("/change-turma-materia/{materiaId}")
+    @PatchMapping("/change-turma-materia/{materiaId}")
     @Transactional
     public ResponseEntity<?> changeTurmaInMateria(
             @RequestParam UUID turmaId,

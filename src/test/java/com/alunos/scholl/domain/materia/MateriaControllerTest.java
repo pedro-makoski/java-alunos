@@ -2,14 +2,15 @@ package com.alunos.scholl.domain.materia;
 
 import com.alunos.scholl.TestUtils;
 import com.alunos.scholl.domain.PageMock;
+import com.alunos.scholl.domain.aluno.dto.request.AddNotaRequest;
 import com.alunos.scholl.domain.aluno.dto.request.CreateAlunoRequest;
 import com.alunos.scholl.domain.aluno.dto.response.AlunoSample;
-import com.alunos.scholl.domain.creatorMocks.AlunoCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.MateriaCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.ProfessorCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.TurmaCreatorMocks;
+import com.alunos.scholl.domain.aluno.dto.response.GridNotas;
+import com.alunos.scholl.domain.creatorMocks.*;
 import com.alunos.scholl.domain.materia.dto.request.CreateMateriaRequest;
 import com.alunos.scholl.domain.materia.dto.response.MateriaSample;
+import com.alunos.scholl.domain.materia.repositories.MateriaRepository;
+import com.alunos.scholl.domain.turma.repositories.TurmaRepository;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
@@ -45,6 +46,7 @@ import static org.junit.jupiter.api.Assertions.*;
         TurmaCreatorMocks.class,
         MateriaCreatorMocks.class,
         ProfessorCreatorMocks.class,
+        PeriodoCreatorMocks.class,
         TestUtils.class
 })
 class MateriaControllerTest {
@@ -62,6 +64,9 @@ class MateriaControllerTest {
     private ProfessorCreatorMocks professorCreatorMocks;
 
     @Autowired
+    private AlunoCreatorMocks alunoCreatorMocks;
+
+    @Autowired
     private TurmaCreatorMocks turmaCreatorMocks;
 
     @MockitoBean
@@ -70,9 +75,17 @@ class MateriaControllerTest {
     @Autowired
     private JacksonTester<PageMock<MateriaSample>> materiaSamplesListJson;
 
-
     @Autowired
     private JacksonTester<MateriaSample> materiaSampleJacksonTester;
+
+    @Autowired
+    private JacksonTester<GridNotas> notasOfAluno;
+
+    @Autowired
+    private MateriaRepository materiaRepository;
+
+    @Autowired
+    private PeriodoCreatorMocks periodoCreatorMocks;
 
     @Test
     @DisplayName("Validar se não aceita envios inválidos")
@@ -286,13 +299,138 @@ class MateriaControllerTest {
 
     @Test
     @DisplayName("Altera matéria da turma e verifica se foi realmente trocado")
-    void changeTurmaInMateria() {
+    void changeTurmaInMateria() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var professor = professorCreatorMocks.createRandomProfessor();
+        var materia = materiaCreatorMocks.createRandomMateria(turma.getId(), professor.professorId());
+
+        var turma2 = turmaCreatorMocks.createTurmaRandom(user);
+
+        var response = mockMvc.perform(
+                MockMvcRequestBuilders
+                        .patch("/materia/change-turma-materia/{materiaId}",
+                                materia.materiaId())
+                        .queryParam("turmaId", turma2.getId().toString())
+        ).andReturn().getResponse();
+
+        var materiaNow = materiaRepository.getReferenceById(materia.materiaId());
+
+        Assertions.assertEquals(HttpStatus.NO_CONTENT.value(), response.getStatus());
+        Assertions.assertEquals(turma2.getId(), materiaNow.getTurma().getId());
     }
 
     @Test
     @DisplayName("Adiciona nota aos alunos e verifica se " +
             "elas foram realmente adicionada")
-    void getNotasOfMateria() {
+    void getNotasOfMateria() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var materia = materiaCreatorMocks
+                .createRandomMateria(turma.getId(), professor.professorId());
+        var periodo = periodoCreatorMocks.createRandomPeriodo();
+
+        var enemyTeacher = professorCreatorMocks.createRandomProfessor();
+
+        var aluno1 = alunoCreatorMocks.createAlunoRandomAndReturnDto(user, turma.getId());
+        var aluno2 = alunoCreatorMocks.createAlunoRandomAndReturnDto(user, turma.getId());
+        var aluno3 = alunoCreatorMocks.createAlunoRandomAndReturnDto(user, turma.getId());
+
+        var alunos = List.of(aluno1, aluno2, aluno3);
+
+        var notaAluno1 = 35.0;
+        var notaAluno2 = 70.0;
+        var notaAluno3 = 40.0;
+
+        var quantAlunos = 3;
+
+        var notaAlunoWrong = 51.0;
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        alunoCreatorMocks.createNota(new AddNotaRequest(
+                notaAluno1,
+                List.of(),
+                aluno1.idAluno(),
+                periodo.idPeriodo(),
+                materia.materiaId()
+        ));
+
+        alunoCreatorMocks.createNota(new AddNotaRequest(
+                notaAluno2,
+                List.of(),
+                aluno2.idAluno(),
+                periodo.idPeriodo(),
+                materia.materiaId()
+        ));
+
+        alunoCreatorMocks.createNota(new AddNotaRequest(
+                notaAluno3,
+                List.of(),
+                aluno3.idAluno(),
+                periodo.idPeriodo(),
+                materia.materiaId()
+        ));
+
+        testUtils.addProfessorOnRequest(enemyTeacher.professorId());
+
+        var wrongRequest = alunoCreatorMocks.createNota(new AddNotaRequest(
+                notaAlunoWrong,
+                List.of(),
+                aluno2.idAluno(),
+                periodo.idPeriodo(),
+                materia.materiaId()
+        ));
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var reqToGet = mockMvc.perform(
+                MockMvcRequestBuilders.get("/materia/grid-materias/get")
+                        .queryParam("periodoId", periodo.idPeriodo().toString())
+                        .queryParam("materiaId", materia.materiaId().toString())
+        ).andReturn().getResponse();
+
+        var reqConverted = notasOfAluno.parseObject(reqToGet.getContentAsString());
+
+        testUtils.addProfessorOnRequest(enemyTeacher.professorId());
+
+        var reqForbidden = mockMvc.perform(
+                MockMvcRequestBuilders.get("/materia/grid-materias/get")
+                        .queryParam("periodoId", periodo.idPeriodo().toString())
+                        .queryParam("materiaId", materia.materiaId().toString())
+        ).andReturn().getResponse();
+
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), wrongRequest.getStatus());
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), reqForbidden.getStatus());
+
+        System.out.println(reqToGet.getContentAsString());
+
+        Assertions.assertEquals(quantAlunos, reqConverted.userItemList().size());
+
+        reqConverted.userItemList()
+                .forEach(u -> {
+                    var alunoFinded = alunos.stream()
+                            .map(a -> a.nome())
+                                    .toList().indexOf(u.nome());
+
+                    switch(alunoFinded) {
+                        case 0:
+                            Assertions.assertEquals(notaAluno1, u.nota());
+                            break;
+                        case 1:
+                            Assertions.assertEquals(notaAluno2, u.nota());
+                            break;
+                        case 2:
+                            Assertions.assertEquals(notaAluno3, u.nota());
+                            break;
+                        default:
+                            fail("Usuário inválido adicionado no meio");
+                    }
+                });
     }
 
     @Test

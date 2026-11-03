@@ -48,7 +48,7 @@ public class TurmaGradeNotasService {
 
         var materia = permissionValidationAndGet.validateAndGetMateria(materiaId, user);
 
-        var result = notaAlunoRepository.findByNotaAlunoIdMateriaAndNotaAlunoIdPeriodo(materiaId, periodoId);
+        var result = notaAlunoRepository.findByNotaAlunoIdMateriaIdAndNotaAlunoIdPeriodoId(materiaId, periodoId);
 
         return new GridNotas(
                 result
