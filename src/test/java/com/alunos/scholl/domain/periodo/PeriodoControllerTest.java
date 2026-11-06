@@ -1,17 +1,21 @@
 package com.alunos.scholl.domain.periodo;
 
 import com.alunos.scholl.TestUtils;
+import com.alunos.scholl.domain.PageMock;
 import com.alunos.scholl.domain.creatorMocks.*;
 import com.alunos.scholl.domain.materia.dto.request.CreateMateriaRequest;
 import com.alunos.scholl.domain.periodo.dto.request.CreatePeriodoRequest;
+import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
 import com.alunos.scholl.domain.periodo.model.TipoPeriodo;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
+import org.hibernate.query.Page;
 import org.junit.jupiter.api.Assertions;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.boot.test.autoconfigure.json.AutoConfigureJsonTesters;
 import org.springframework.boot.test.context.SpringBootTest;
+import org.springframework.boot.test.json.JacksonTester;
 import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.http.HttpStatus;
@@ -19,8 +23,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -52,6 +59,12 @@ class PeriodoControllerTest {
 
     @MockitoBean
     GetUserOnRequest getUserOnRequest;
+
+    @Autowired
+    private JacksonTester<PageMock<PeriodoSample>> pageMockJacksonTesterOfPeriodo;
+
+    @Autowired
+    private JacksonTester<PeriodoSample> periodoSampleJacksonTester;
 
     @Test
     @DisplayName("Validar se não aceita envios nulos")
@@ -103,17 +116,85 @@ class PeriodoControllerTest {
     @Test
     @DisplayName("Envia um conjunto de períodos válidos e inválidos e verifica " +
             "se os válidos são retornados")
-    void getMyPeriodos() {
-    }
+    void getMyPeriodos() throws Exception {
+        var user = testUtils.addUserOnRequest();
 
-    @Test
-    @DisplayName("Envia um período inválido e espera retorno not found")
-    void getPeriodoInvalidById() {
+        var periodoInvalid1 = new CreatePeriodoRequest(
+                null,
+                testUtils.getRandomDate(),
+                testUtils.getRandomDate()
+        );
+
+        var periodoInvalid2 = new CreatePeriodoRequest(
+                TipoPeriodo.ANUAL,
+                testUtils.getRandomDate(),
+                null
+        );
+
+        var periodoValid1 = new CreatePeriodoRequest(
+                TipoPeriodo.ANUAL,
+                testUtils.getRandomDate(),
+                testUtils.getRandomDate()
+        );
+
+        var periodoValid2 = new CreatePeriodoRequest(
+                TipoPeriodo.ANUAL,
+                testUtils.getRandomDate(),
+                testUtils.getRandomDate()
+        );;
+
+        var periodoValid3 = new CreatePeriodoRequest(
+                TipoPeriodo.ANUAL,
+                testUtils.getRandomDate(),
+                testUtils.getRandomDate()
+        );
+
+        var periodosInvalidos = List.of(periodoInvalid1, periodoInvalid2);
+        var periodosValidos = List.of(periodoValid1, periodoValid2, periodoValid3);
+
+        var periodos = new ArrayList<>(periodosInvalidos);
+
+        periodos.addAll(periodosValidos);
+
+        periodos.forEach(periodoCreatorMocks::createPeriodo);
+
+        var periodoResponse = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/periodo"))
+                .andReturn().getResponse();
+
+
+        var response = pageMockJacksonTesterOfPeriodo
+                .parseObject(periodoResponse.getContentAsString());
+
+        Assertions.assertEquals(HttpStatus.OK.value(), periodoResponse.getStatus());
+        Assertions.assertEquals(periodosValidos.size(), response.totalElements());
     }
 
     @Test
     @DisplayName("Envia um período válido e espera retorno com os dados corretos")
-    void getPeriodoValidById() {
+    void getPeriodoValidById() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var periodoDto = new CreatePeriodoRequest(
+                TipoPeriodo.BIMESTRAL,
+                LocalDate.now().minusMonths(2),
+                LocalDate.now()
+        );
+
+        var periodo = periodoCreatorMocks.createPeriodoRequest(periodoDto);
+
+        var periodoGet = mockMvc
+                .perform(MockMvcRequestBuilders.get(
+                        "/periodo/{id}", periodo.idPeriodo().toString()))
+                .andReturn().getResponse();
+
+        var result = periodoSampleJacksonTester.parseObject(periodoGet.getContentAsString());
+
+        Assertions.assertEquals(HttpStatus.OK.value(), periodoGet.getStatus());
+        Assertions.assertEquals(periodoDto.tipoPeriodo(), result.tipoPeriodo());
+        Assertions.assertEquals(periodoDto.inicio(), result.inicio());
+        Assertions.assertEquals(periodoDto.fim(), result.fim());
+
     }
 
     @Test
