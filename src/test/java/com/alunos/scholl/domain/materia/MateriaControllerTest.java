@@ -196,14 +196,14 @@ class MateriaControllerTest {
                 turmaBase.getId()
         );
 
-        var alunosInvalidos = List.of(materiaInvalid1, materiaInvalid2);
-        var alunosValido = List.of(materiaValid1, materiaValid2, materiaValid3);
+        var materiasInvalidos = List.of(materiaInvalid1, materiaInvalid2);
+        var materiasValido = List.of(materiaValid1, materiaValid2, materiaValid3);
 
-        var alunos = new ArrayList<>(alunosValido);
+        var materias = new ArrayList<>(materiasValido);
 
-        alunos.addAll(alunosInvalidos);
+        materias.addAll(materiasInvalidos);
 
-        alunos.forEach(materiaCreatorMocks::createMateria);
+        materias.forEach(materiaCreatorMocks::createMateria);
 
         var materiaResponse = mockMvc.perform(
                         MockMvcRequestBuilders.get("/materia"))
