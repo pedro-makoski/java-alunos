@@ -412,8 +412,6 @@ class MateriaControllerTest {
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), wrongRequest.getStatus());
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), reqForbidden.getStatus());
 
-        System.out.println(reqToGet.getContentAsString());
-
         Assertions.assertEquals(quantAlunos, reqConverted.userItemList().size());
 
         reqConverted.userItemList()
