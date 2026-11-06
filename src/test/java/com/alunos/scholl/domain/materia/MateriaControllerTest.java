@@ -10,6 +10,7 @@ import com.alunos.scholl.domain.creatorMocks.*;
 import com.alunos.scholl.domain.materia.dto.request.CreateMateriaRequest;
 import com.alunos.scholl.domain.materia.dto.response.MateriaSample;
 import com.alunos.scholl.domain.materia.repositories.MateriaRepository;
+import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
 import com.alunos.scholl.domain.turma.repositories.TurmaRepository;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import org.junit.jupiter.api.Assertions;
@@ -32,6 +33,7 @@ import org.springframework.transaction.annotation.Transactional;
 import java.time.LocalDate;
 import java.util.ArrayList;
 import java.util.List;
+import java.util.UUID;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -86,6 +88,9 @@ class MateriaControllerTest {
 
     @Autowired
     private PeriodoCreatorMocks periodoCreatorMocks;
+
+    @Autowired
+    private JacksonTester<PageMock<PeriodoSample>> periodoSampleJson;
 
     @Test
     @DisplayName("Validar se não aceita envios inválidos")
@@ -436,7 +441,39 @@ class MateriaControllerTest {
     @Test
     @DisplayName("Adiciona períodos na matéria e verifica " +
             "se eles foram realmente adicionados")
-    void getPeriodosOfMateria() {
+    void getPeriodosOfMateria() throws Exception {
+        var user = testUtils.addUserOnRequest();
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+        var materia = materiaCreatorMocks
+                    .createRandomMateria(turma.getId(), professor.professorId());
+
+        var periodo1 = periodoCreatorMocks.createRandomPeriodo();
+        var periodo2 = periodoCreatorMocks.createRandomPeriodo();
+        var periodo3 = periodoCreatorMocks.createRandomPeriodo();
+        periodoCreatorMocks.createRandomPeriodo();
+
+        var periodos = List.of(periodo1, periodo2, periodo3);
+
+        addPeriodoInMateria(periodo1.idPeriodo(), materia.materiaId());
+        addPeriodoInMateria(periodo2.idPeriodo(), materia.materiaId());
+        addPeriodoInMateria(periodo3.idPeriodo(), materia.materiaId());
+
+        var response = mockMvc
+                .perform(MockMvcRequestBuilders.get("/materia/grid-materia/get-periodos")
+                        .queryParam("idMateria", materia.materiaId().toString())
+                )
+                .andReturn().getResponse();
+
+        var responseDto = periodoSampleJson.parseObject(response.getContentAsString());
+
+        responseDto.content()
+                .forEach(i -> {
+                    var item = periodos.stream().filter(p -> p.idPeriodo().equals(i.idPeriodo())).toList();
+
+                    Assertions.assertEquals(1, item.size());
+                });
     }
 
     @Test
@@ -455,5 +492,15 @@ class MateriaControllerTest {
     @DisplayName("Adiciona período na matéria e " +
             "verifica se foi realmente adicionada")
     void addPeriodoInMateria() {
+    }
+
+    private void addPeriodoInMateria(UUID periodoId, UUID idMateria) throws Exception {
+        mockMvc.
+                perform(MockMvcRequestBuilders
+                        .patch("/materia/add-periodo-in-materia/{materiaId}",
+                                idMateria.toString())
+                        .queryParam("periodoId", periodoId.toString()))
+                .andReturn().getResponse();
+
     }
 }
