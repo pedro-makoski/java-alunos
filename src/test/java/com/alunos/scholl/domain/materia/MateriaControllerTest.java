@@ -214,7 +214,7 @@ class MateriaControllerTest {
                     .parseObject(materiaResponse.getContentAsString());
 
         Assertions.assertEquals(HttpStatus.OK.value(), materiaResponse.getStatus());
-        Assertions.assertEquals(alunosValido.size(), response.totalElements());
+        Assertions.assertEquals(materiasValido.size(), response.totalElements());
     }
 
     @Test
