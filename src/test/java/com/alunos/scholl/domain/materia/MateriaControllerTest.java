@@ -519,12 +519,6 @@ class MateriaControllerTest {
         });
     }
 
-    @Test
-    @DisplayName("Adiciona período na matéria e " +
-            "verifica se foi realmente adicionada")
-    void addPeriodoInMateria() {
-    }
-
     private void addPeriodoInMateria(UUID periodoId, UUID idMateria) throws Exception {
         mockMvc.
                 perform(MockMvcRequestBuilders
