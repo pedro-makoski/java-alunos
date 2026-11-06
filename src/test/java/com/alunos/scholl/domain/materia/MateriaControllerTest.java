@@ -468,6 +468,8 @@ class MateriaControllerTest {
 
         var responseDto = periodoSampleJson.parseObject(response.getContentAsString());
 
+        Assertions.assertEquals(periodos.size(), responseDto.totalElements());
+
         responseDto.content()
                 .forEach(i -> {
                     var item = periodos.stream().filter(p -> p.idPeriodo().equals(i.idPeriodo())).toList();
@@ -477,15 +479,44 @@ class MateriaControllerTest {
     }
 
     @Test
-    @DisplayName("Envia um conjunto de materias válidas de um professor e verifica se" +
-            "apenas a do professor foi retornada")
-    void getMyMateriasByTeacher() {
-    }
-
-    @Test
     @DisplayName("Adiciona matérias ao aluno e " +
             "verifica se elas foram realmente adicionadas")
-    void getMateriasOfAluno() {
+    void getMateriasOfAluno() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var turma2 = turmaCreatorMocks.createTurmaRandom(user);
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+        var aluno1 = alunoCreatorMocks.createAlunoRandom(user, turma.getId());
+        var aluno2 = alunoCreatorMocks.createAlunoRandom(user, turma.getId());
+        var aluno3 = alunoCreatorMocks.createAlunoRandom(user, turma2.getId());
+
+        var materia1 = materiaCreatorMocks
+                .createRandomMateria(turma.getId(), professor.professorId());
+        var materia2 = materiaCreatorMocks
+                .createRandomMateria(turma.getId(), professor.professorId());
+
+        var materia3 = materiaCreatorMocks
+                .createRandomMateria(turma2.getId(), professor.professorId());
+
+        var materiasOfTurma1 = List.of(materia1, materia2);
+
+        var materiaGet = mockMvc.perform(MockMvcRequestBuilders
+                .get("/materia/materias-of-aluno/{alunoId}", aluno1.idAluno()))
+                .andReturn().getResponse();
+
+        var materiaResult = materiaSamplesListJson.parseObject(materiaGet.getContentAsString());
+
+        Assertions.assertEquals(materiasOfTurma1.size(), materiaResult.totalElements());
+
+        materiaResult.content().forEach(m -> {
+            var materiaFinded = materiasOfTurma1.stream().filter(mt ->
+                    mt.materiaId().equals(m.idMateria())).toList();
+
+            Assertions.assertEquals(1, materiaFinded.size());
+        });
     }
 
     @Test
