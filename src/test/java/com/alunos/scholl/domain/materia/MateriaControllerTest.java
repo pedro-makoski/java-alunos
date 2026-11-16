@@ -196,14 +196,14 @@ class MateriaControllerTest {
                 turmaBase.getId()
         );
 
-        var materiasInvalidos = List.of(materiaInvalid1, materiaInvalid2);
-        var materiasValido = List.of(materiaValid1, materiaValid2, materiaValid3);
+        var alunosInvalidos = List.of(materiaInvalid1, materiaInvalid2);
+        var alunosValido = List.of(materiaValid1, materiaValid2, materiaValid3);
 
-        var materias = new ArrayList<>(materiasValido);
+        var alunos = new ArrayList<>(alunosValido);
 
-        materias.addAll(materiasInvalidos);
+        alunos.addAll(alunosInvalidos);
 
-        materias.forEach(materiaCreatorMocks::createMateria);
+        alunos.forEach(materiaCreatorMocks::createMateria);
 
         var materiaResponse = mockMvc.perform(
                         MockMvcRequestBuilders.get("/materia"))
@@ -211,10 +211,10 @@ class MateriaControllerTest {
 
 
         var response = materiaSamplesListJson
-                    .parseObject(materiaResponse.getContentAsString());
+                .parseObject(materiaResponse.getContentAsString());
 
         Assertions.assertEquals(HttpStatus.OK.value(), materiaResponse.getStatus());
-        Assertions.assertEquals(materiasValido.size(), response.totalElements());
+        Assertions.assertEquals(alunosValido.size(), response.totalElements());
     }
 
     @Test
@@ -238,7 +238,7 @@ class MateriaControllerTest {
         ).andReturn().getResponse();
 
         var materiaGetDto = materiaSampleJacksonTester
-                    .parseObject(materiaGet.getContentAsString());
+                .parseObject(materiaGet.getContentAsString());
 
         Assertions.assertEquals(materiaDto.nome(), materiaGetDto.nome());
 
@@ -412,13 +412,15 @@ class MateriaControllerTest {
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), wrongRequest.getStatus());
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), reqForbidden.getStatus());
 
+        System.out.println(reqToGet.getContentAsString());
+
         Assertions.assertEquals(quantAlunos, reqConverted.userItemList().size());
 
         reqConverted.userItemList()
                 .forEach(u -> {
                     var alunoFinded = alunos.stream()
                             .map(a -> a.nome())
-                                    .toList().indexOf(u.nome());
+                            .toList().indexOf(u.nome());
 
                     switch(alunoFinded) {
                         case 0:
@@ -445,7 +447,7 @@ class MateriaControllerTest {
         var professor = professorCreatorMocks.createRandomProfessor();
 
         var materia = materiaCreatorMocks
-                    .createRandomMateria(turma.getId(), professor.professorId());
+                .createRandomMateria(turma.getId(), professor.professorId());
 
         var periodo1 = periodoCreatorMocks.createRandomPeriodo();
         var periodo2 = periodoCreatorMocks.createRandomPeriodo();
@@ -502,7 +504,7 @@ class MateriaControllerTest {
         var materiasOfTurma1 = List.of(materia1, materia2);
 
         var materiaGet = mockMvc.perform(MockMvcRequestBuilders
-                .get("/materia/materias-of-aluno/{alunoId}", aluno1.idAluno()))
+                        .get("/materia/materias-of-aluno/{alunoId}", aluno1.idAluno()))
                 .andReturn().getResponse();
 
         var materiaResult = materiaSamplesListJson.parseObject(materiaGet.getContentAsString());
