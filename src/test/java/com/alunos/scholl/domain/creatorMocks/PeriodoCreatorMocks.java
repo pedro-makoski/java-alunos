@@ -46,9 +46,9 @@ public class PeriodoCreatorMocks {
     }
 
     public CreatePeriodoResponse createPeriodoRequest(CreatePeriodoRequest
-                                                                  createProfessorRequest)
+                                                                  createPeriodoRequest)
             throws Exception{
-        var result = createPeriodo(createProfessorRequest);
+        var result = createPeriodo(createPeriodoRequest);
 
         return createPeriodoResponseJacksonTester.parseObject(result.getContentAsString());
     }
