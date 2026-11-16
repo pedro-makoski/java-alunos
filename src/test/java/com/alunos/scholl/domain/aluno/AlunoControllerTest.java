@@ -76,6 +76,9 @@ class AlunoControllerTest {
     @Autowired
     private ProfessorCreatorMocks professorCreatorMocks;
 
+    @MockitoBean
+    GetUserOnRequest getUserOnRequest;
+
     @Autowired
     private AlunoRepository alunoRepository;
 
