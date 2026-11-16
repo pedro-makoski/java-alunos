@@ -6,7 +6,11 @@ import com.alunos.scholl.domain.creatorMocks.*;
 import com.alunos.scholl.domain.materia.dto.request.CreateMateriaRequest;
 import com.alunos.scholl.domain.periodo.dto.request.CreatePeriodoRequest;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
+import com.alunos.scholl.domain.periodo.exceptions.PeriodoNotFound;
 import com.alunos.scholl.domain.periodo.model.TipoPeriodo;
+import com.alunos.scholl.domain.periodo.model.TurmaPeriodoId;
+import com.alunos.scholl.domain.periodo.repositories.PeriodoRepository;
+import com.alunos.scholl.domain.periodo.repositories.TurmaPeriodoRepository;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import org.hibernate.query.Page;
 import org.junit.jupiter.api.Assertions;
@@ -61,10 +65,19 @@ class PeriodoControllerTest {
     GetUserOnRequest getUserOnRequest;
 
     @Autowired
+    private TurmaCreatorMocks turmaCreatorMocks;
+
+    @Autowired
     private JacksonTester<PageMock<PeriodoSample>> pageMockJacksonTesterOfPeriodo;
 
     @Autowired
     private JacksonTester<PeriodoSample> periodoSampleJacksonTester;
+
+    @Autowired
+    private TurmaPeriodoRepository turmaPeriodoRepository;
+
+    @Autowired
+    private PeriodoRepository periodoRepository;
 
     @Test
     @DisplayName("Validar se não aceita envios nulos")
@@ -199,7 +212,26 @@ class PeriodoControllerTest {
 
     @Test
     @DisplayName("Adiciona turma em um período e verifica se foi realmente adicionado")
-    void addTurmaInPeriodo() {
+    void addTurmaInPeriodo() throws Exception {
+        var user = testUtils.addUserOnRequest();
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var periodo = periodoCreatorMocks.createRandomPeriodo();
+
+        mockMvc.perform(
+                MockMvcRequestBuilders
+                        .patch("/periodo/add-turma-in-periodo/{periodoId}", periodo.idPeriodo())
+                        .queryParam("turmaId", turma.getId().toString())
+        );
+
+        var periodoEntity = periodoRepository.findById(periodo.idPeriodo())
+                    .orElseThrow(PeriodoNotFound::new);
+
+        var res = turmaPeriodoRepository
+                    .findById(new TurmaPeriodoId(periodoEntity, turma)).isPresent();
+
+        Assertions.assertTrue(res);
+
+
     }
 
     @Test
