@@ -357,16 +357,4 @@ class PeriodoControllerTest {
 
         Assertions.assertEquals(HttpStatus.NOT_FOUND.value(),periodoGet.getStatus());
     }
-
-    @Test
-    @DisplayName("Adiciona turma ao aluno e " +
-            "verifica se ela foram realmente adicionadas")
-    void getTurmaOfAluno() {
-    }
-
-    @Test
-    @DisplayName("Adiciona período na matéria e " +
-            "verifica se foi realmente adicionada")
-    void addPeriodoInMateria() {
-    }
 }
