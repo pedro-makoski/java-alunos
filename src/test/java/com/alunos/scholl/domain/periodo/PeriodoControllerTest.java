@@ -79,6 +79,12 @@ class PeriodoControllerTest {
     @Autowired
     private PeriodoRepository periodoRepository;
 
+    @Autowired
+    private ProfessorCreatorMocks professorCreatorMocks;
+
+    @Autowired
+    private MateriaCreatorMocks materiaCreatorMocks;
+
     @Test
     @DisplayName("Validar se não aceita envios nulos")
     void createInvalid() {
@@ -230,14 +236,59 @@ class PeriodoControllerTest {
                     .findById(new TurmaPeriodoId(periodoEntity, turma)).isPresent();
 
         Assertions.assertTrue(res);
-
-
     }
 
     @Test
     @DisplayName("Envia um conjunto de períodos válidos de um professor e verifica se" +
             "apenas a do professor foram retornadas")
-    void getMyPeriodoByTeacher() {
+    void getMyPeriodoByTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var periodo1 = periodoCreatorMocks.createRandomPeriodo();
+        var periodo2 = periodoCreatorMocks.createRandomPeriodo();
+        var periodo3 = periodoCreatorMocks.createRandomPeriodo();
+
+        var periodosOfTeacher = List.of(periodo1, periodo2);
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+
+        var materia = materiaCreatorMocks
+                .createRandomMateria(turma.getId(), professor.professorId());
+
+        periodosOfTeacher.forEach(periodo -> {
+            try {
+                mockMvc.perform(
+                        MockMvcRequestBuilders
+                                .patch("/periodo/add-turma-in-periodo/{periodoId}", periodo.idPeriodo())
+                                .queryParam("turmaId", turma.getId().toString())
+                );
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        });
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var periodoResponse = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/periodo"))
+                .andReturn().getResponse();
+
+        System.out.println(periodoResponse);
+
+        var response = pageMockJacksonTesterOfPeriodo
+                .parseObject(periodoResponse.getContentAsString());
+
+        var ids = response.content().stream()
+                .map(PeriodoSample::idPeriodo).toList();
+
+        Assertions.assertEquals(periodosOfTeacher.size(),
+                response.totalElements());
+
+        periodosOfTeacher.forEach(p -> {
+            Assertions.assertEquals(1, ids.stream()
+                    .filter(i -> p.idPeriodo().equals(i)).toList().size());
+        });
     }
 
     @Test
