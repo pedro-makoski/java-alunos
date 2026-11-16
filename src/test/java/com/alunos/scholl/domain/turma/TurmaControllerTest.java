@@ -3,7 +3,9 @@ package com.alunos.scholl.domain.turma;
 import com.alunos.scholl.TestUtils;
 import com.alunos.scholl.domain.PageMock;
 import com.alunos.scholl.domain.creatorMocks.*;
+import com.alunos.scholl.domain.periodo.dto.request.CreatePeriodoRequest;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
+import com.alunos.scholl.domain.periodo.model.TipoPeriodo;
 import com.alunos.scholl.domain.professor.dto.request.CreateProfessorRequest;
 import com.alunos.scholl.domain.professor.dto.response.SampleProfessor;
 import com.alunos.scholl.domain.turma.dto.request.CreateTurmaRequest;
@@ -288,12 +290,61 @@ class TurmaControllerTest {
     @Test
     @DisplayName("Envia uma turma válida de um professor " +
             "e espera retorno como encontrado ")
-    void getTurmaValidByIdOnTeacher() {
+    void getTurmaValidByIdOnTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var createTurmaRequest = new CreateTurmaRequest(
+                "bccca",
+                TipoTurma.MEDIO,
+                20L
+        );
+
+        var turma = turmaCreatorMocks.createTurmaRequest(createTurmaRequest);
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+        var materia = materiaCreatorMocks.
+                createRandomMateria(turma.idTurma(), professor.professorId());
+
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var turmaGet = mockMvc
+                .perform(MockMvcRequestBuilders.get(
+                        "/turma/{id}", turma.idTurma()))
+                .andReturn().getResponse();
+
+        var result = sampleTurmaJacksonTester
+                .parseObject(turmaGet.getContentAsString());
+
+        Assertions.assertEquals(createTurmaRequest.nome(), result.nome());
+        Assertions.assertEquals(createTurmaRequest.tipoTurma(), result.tipoTurma());
+        Assertions.assertEquals(createTurmaRequest.tamanhoMaximo(), result.tamanhoMaximoTurma());
     }
 
     @Test
     @DisplayName("Envia uma turma válida que não é do professor " +
             "e espera retorno como não encontrado ")
-    void getTurmaValidByIdOnNotTeacher() {
+    void getTurmaValidByIdOnNotTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var createTurmaRequest = new CreateTurmaRequest(
+                "bccca",
+                TipoTurma.MEDIO,
+                20L
+        );
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var turmaGet = mockMvc
+                .perform(MockMvcRequestBuilders.get(
+                        "/turma/{id}", turma.getId()))
+                .andReturn().getResponse();
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(), turmaGet.getStatus());
     }
 }
