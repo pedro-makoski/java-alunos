@@ -61,9 +61,6 @@ class AlunoControllerTest {
     @Autowired
     private TestUtils testUtils;
 
-    @MockitoBean
-    GetUserOnRequest getUserOnRequest;
-
     @Autowired
     private JacksonTester<PageMock<AlunoSample>>  alunoSampleListJson;
 
@@ -93,9 +90,6 @@ class AlunoControllerTest {
 
     @Autowired
     private JacksonTester<AlunoDetails> alunoDetailsJacksonTester;
-
-    @PersistenceContext
-    EntityManager entityManager;
 
     @Test
     @DisplayName("Validar se não aceita envios inválidos")

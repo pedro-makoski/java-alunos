@@ -22,7 +22,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, UUID> {
         JOIN m.professor prof
         JOIN m.turma turma
             
-        WHERE prof.id = :profId
+        WHERE prof.id = :id
             
     """)
     Page<Periodo> findByProfessorId(UUID id, PageRequest of);

@@ -1,10 +1,8 @@
 package com.alunos.scholl.domain.professor;
 
 import com.alunos.scholl.TestUtils;
-import com.alunos.scholl.domain.creatorMocks.AlunoCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.MateriaCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.ProfessorCreatorMocks;
-import com.alunos.scholl.domain.creatorMocks.TurmaCreatorMocks;
+import com.alunos.scholl.domain.creatorMocks.*;
+import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import org.junit.jupiter.api.DisplayName;
 import org.junit.jupiter.api.Test;
 import org.springframework.beans.factory.annotation.Autowired;
@@ -14,7 +12,9 @@ import org.springframework.boot.webmvc.test.autoconfigure.AutoConfigureMockMvc;
 import org.springframework.context.annotation.Import;
 import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
+import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.transaction.annotation.Transactional;
 
 import static org.junit.jupiter.api.Assertions.*;
 
@@ -22,14 +22,16 @@ import static org.junit.jupiter.api.Assertions.*;
 @AutoConfigureMockMvc
 @AutoConfigureJsonTesters
 @ActiveProfiles("test")
-@WithMockUser
+@Transactional
 @Import({
         AlunoCreatorMocks.class,
         TurmaCreatorMocks.class,
         MateriaCreatorMocks.class,
         ProfessorCreatorMocks.class,
+        PeriodoCreatorMocks.class,
         TestUtils.class
 })
+@WithMockUser(authorities = "DONO")
 class ProfessorControllerTest {
 
     @Autowired
@@ -37,6 +39,9 @@ class ProfessorControllerTest {
 
     @Autowired
     private TestUtils testUtils;
+
+    @MockitoBean
+    GetUserOnRequest getUserOnRequest;
 
     @Test
     @DisplayName("Validar se não aceita envios inválidos")
