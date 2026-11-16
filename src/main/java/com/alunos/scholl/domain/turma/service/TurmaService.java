@@ -1,5 +1,7 @@
 package com.alunos.scholl.domain.turma.service;
 
+import com.alunos.scholl.domain.materia.dto.response.MateriaSample;
+import com.alunos.scholl.domain.materia.repositories.MateriaRepository;
 import com.alunos.scholl.domain.turma.dto.request.CreateTurmaRequest;
 import com.alunos.scholl.domain.turma.dto.response.CreateTurmaResponse;
 import com.alunos.scholl.domain.turma.dto.response.SampleTurma;
@@ -36,6 +38,9 @@ public class TurmaService {
     @Autowired
     private GetUserOnRequest getUserOnRequest;
 
+    @Autowired
+    private MateriaRepository materiaRepository;
+
     public ResponseEntity<CreateTurmaResponse> createTurma(
             @Valid CreateTurmaRequest createTurmaRequest,
             HttpServletRequest httpServletRequest
@@ -66,7 +71,7 @@ public class TurmaService {
 
         if(user.isTeacher()) {
             return turmaRepository
-                    .findByTeacherId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .findByTeacherId(user.getProfessor().getId(), PageRequest.of(pageNumber, Constants.pageSize))
                     .map(SampleTurma::new);
         }
 

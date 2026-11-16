@@ -8,9 +8,11 @@ import java.util.UUID;
 public record SampleTurma(
         UUID id,
         String nome,
-        TipoTurma tipoTurma
+        TipoTurma tipoTurma,
+        Long tamanhoMaximoTurma
 ) {
     public SampleTurma(Turma turma) {
-        this(turma.getId(), turma.getNome(), turma.getTipo());
+        this(turma.getId(), turma.getNome(),
+                turma.getTipo(), turma.getTamanhoMaximo());
     }
 }

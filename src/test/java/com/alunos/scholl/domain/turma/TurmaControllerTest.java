@@ -3,6 +3,8 @@ package com.alunos.scholl.domain.turma;
 import com.alunos.scholl.TestUtils;
 import com.alunos.scholl.domain.PageMock;
 import com.alunos.scholl.domain.creatorMocks.*;
+import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
+import com.alunos.scholl.domain.professor.dto.request.CreateProfessorRequest;
 import com.alunos.scholl.domain.professor.dto.response.SampleProfessor;
 import com.alunos.scholl.domain.turma.dto.request.CreateTurmaRequest;
 import com.alunos.scholl.domain.turma.dto.response.SampleTurma;
@@ -22,8 +24,11 @@ import org.springframework.security.test.context.support.WithMockUser;
 import org.springframework.test.context.ActiveProfiles;
 import org.springframework.test.context.bean.override.mockito.MockitoBean;
 import org.springframework.test.web.servlet.MockMvc;
+import org.springframework.test.web.servlet.request.MockMvcRequestBuilders;
 import org.springframework.transaction.annotation.Transactional;
 
+import java.time.LocalDate;
+import java.util.ArrayList;
 import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
@@ -61,6 +66,12 @@ class TurmaControllerTest {
 
     @Autowired
     private TurmaCreatorMocks turmaCreatorMocks;
+
+    @Autowired
+    private ProfessorCreatorMocks professorCreatorMocks;
+
+    @Autowired
+    private MateriaCreatorMocks materiaCreatorMocks;
 
     @Test
     @DisplayName("Validar se não aceita envios inválidos")
@@ -136,23 +147,142 @@ class TurmaControllerTest {
     @Test
     @DisplayName("Envia um conjunto de turmas válidas e inválidas e verifica " +
             "se as válidas são retornadas")
-    void getMyTurmas() {
-    }
+    void getMyTurmas() throws Exception {
+        var user = testUtils.addUserOnRequest();
 
-    @Test
-    @DisplayName("Envia uma turma inválida e espera retornar um not found")
-    void getProfessoresInvalidById() {
+        var turmaInvalid1 = new CreateTurmaRequest(
+                null,
+                TipoTurma.FUNDAMENTAL,
+                20L
+        );
+
+        var turmaInvalid2 = new CreateTurmaRequest(
+                "bccca",
+                null,
+                -50L
+        );
+
+        var turmaInvalid3 = new CreateTurmaRequest(
+                "bccca",
+                TipoTurma.MEDIO,
+                null
+        );
+
+        var turmaValid1 = new CreateTurmaRequest(
+                "bccca",
+                TipoTurma.MEDIO,
+                20L
+        );
+
+        var turmaValid2 = new CreateTurmaRequest(
+                "bccca",
+                TipoTurma.MEDIO,
+                20L
+        );
+
+        var turmaValid3 = new CreateTurmaRequest(
+                "bccca",
+                TipoTurma.MEDIO,
+                20L
+        );
+
+        var turmaValid4 = new CreateTurmaRequest(
+                "bccca",
+                TipoTurma.MEDIO,
+                20L
+        );
+
+        var turmasInvalidos = List.of(turmaInvalid1,
+                turmaInvalid2, turmaInvalid3);
+        var turmasValidos = List.of(turmaValid1, turmaValid2, turmaValid3, turmaValid4);
+
+        var turmas = new ArrayList<>(turmasInvalidos);
+
+        turmas.addAll(turmasValidos);
+
+        turmas.forEach(turmaCreatorMocks::createTurma);
+
+        var professorResponse = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/turma"))
+                .andReturn().getResponse();
+
+        var response = listOfTurmaJacksonTester
+                .parseObject(professorResponse.getContentAsString());
+
+        Assertions.assertEquals(HttpStatus.OK.value(), professorResponse.getStatus());
+        Assertions.assertEquals(turmasValidos.size(), response.totalElements());
     }
 
     @Test
     @DisplayName("Envia uma turma válida e espera retorno com os dados corretos")
-    void getPeriodoValidById() {
+    void getTurmaValidById() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turmaValid = new CreateTurmaRequest(
+                "bccca",
+                TipoTurma.MEDIO,
+                20L
+        );
+
+        var turma = turmaCreatorMocks.createTurmaRequest(turmaValid);
+
+        var turmaGet = mockMvc.perform(
+                MockMvcRequestBuilders.get("/turma/{turmaId}", turma.idTurma())
+        ).andReturn().getResponse();
+
+        var turmaGetDto = sampleTurmaJacksonTester
+                .parseObject(turmaGet.getContentAsString());
+
+        Assertions.assertEquals(turmaValid.nome(), turmaGetDto.nome());
+        Assertions.assertEquals(turmaValid.tipoTurma(), turmaGetDto.tipoTurma());
+        Assertions.assertEquals(turmaValid.tamanhoMaximo(), turmaGetDto.tamanhoMaximoTurma());
     }
 
     @Test
     @DisplayName("Envia um conjunto de turmas válidas de um professor e verifica se" +
             "apenas as do professor foram retornadas")
-    void getMyTurmaByTeacher() {
+    void getMyTurmaByTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var turma1 = turmaCreatorMocks.createRandomTurma();
+        var turma2 = turmaCreatorMocks.createRandomTurma();
+        var turma3 = turmaCreatorMocks.createRandomTurma();
+
+        var turmasOfTeacher = List.of(turma1, turma2);
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+        var professor2 = professorCreatorMocks.createRandomProfessor();
+
+        turmasOfTeacher.forEach(t -> {
+            try {
+                materiaCreatorMocks
+                        .createRandomMateria(t.idTurma(), professor.professorId());
+            } catch (Exception e) {
+                fail(e.getMessage());
+            }
+        });
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var turmaResponse = mockMvc.perform(
+                        MockMvcRequestBuilders.get("/turma"))
+                .andReturn().getResponse();
+
+        System.out.println(turmaResponse.getContentAsString()+" -- azuç");
+
+        var response = listOfTurmaJacksonTester
+                .parseObject(turmaResponse.getContentAsString());
+
+        var ids = response.content().stream()
+                .map(SampleTurma::id).toList();
+
+        Assertions.assertEquals(turmasOfTeacher.size(),
+                response.totalElements());
+
+        turmasOfTeacher.forEach(p -> {
+            Assertions.assertEquals(1, ids.stream()
+                    .filter(i -> p.idTurma().equals(i)).toList().size());
+        });
     }
 
     @Test
