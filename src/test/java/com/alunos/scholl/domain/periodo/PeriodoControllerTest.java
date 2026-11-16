@@ -294,13 +294,68 @@ class PeriodoControllerTest {
     @Test
     @DisplayName("Envia um período válido de um professor " +
             "e espera retorno como encontrado ")
-    void getPeriodoValidByIdOnTeacher() {
+    void getPeriodoValidByIdOnTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var createPeriodoRequest = new CreatePeriodoRequest(
+                TipoPeriodo.ANUAL,
+                LocalDate.now().minusMonths(3),
+                LocalDate.now()
+        );
+
+        var periodo = periodoCreatorMocks.createPeriodoRequest(createPeriodoRequest);
+
+        var turma = turmaCreatorMocks.createTurmaRandom(user);
+        var professor = professorCreatorMocks.createRandomProfessor();
+        var materia = materiaCreatorMocks.
+                    createRandomMateria(turma.getId(), professor.professorId());
+
+        mockMvc.perform(
+                MockMvcRequestBuilders
+                        .patch("/periodo/add-turma-in-periodo/{periodoId}", periodo.idPeriodo())
+                        .queryParam("turmaId", turma.getId().toString())
+        );
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var periodoGet = mockMvc
+                .perform(MockMvcRequestBuilders.get(
+                        "/periodo/{id}", periodo.idPeriodo()))
+                .andReturn().getResponse();
+
+        var result = periodoSampleJacksonTester
+                    .parseObject(periodoGet.getContentAsString());
+
+        Assertions.assertEquals(createPeriodoRequest.tipoPeriodo(), result.tipoPeriodo());
+        Assertions.assertEquals(createPeriodoRequest.inicio(), result.inicio());
+        Assertions.assertEquals(createPeriodoRequest.fim(), result.fim());
+
     }
 
     @Test
     @DisplayName("Envia um período válido que não é do professor " +
             "e espera retorno como não encontrado ")
-    void getPeridooValidByIdOnNotTeacher() {
+    void getPeridooValidByIdOnNotTeacher() throws Exception {
+        var user = testUtils.addUserOnRequest();
+
+        var createPeriodoRequest = new CreatePeriodoRequest(
+                TipoPeriodo.ANUAL,
+                LocalDate.now().minusMonths(3),
+                LocalDate.now()
+        );
+
+        var periodo = periodoCreatorMocks.createPeriodoRequest(createPeriodoRequest);
+
+        var professor = professorCreatorMocks.createRandomProfessor();
+
+        testUtils.addProfessorOnRequest(professor.professorId());
+
+        var periodoGet = mockMvc
+                .perform(MockMvcRequestBuilders.get(
+                        "/periodo/{id}", periodo.idPeriodo()))
+                .andReturn().getResponse();
+
+        Assertions.assertEquals(HttpStatus.NOT_FOUND.value(),periodoGet.getStatus());
     }
 
     @Test
