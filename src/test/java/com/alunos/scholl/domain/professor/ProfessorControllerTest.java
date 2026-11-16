@@ -262,7 +262,7 @@ class ProfessorControllerTest {
 
     @Test
     @DisplayName("Envia um professor válido e espera retorno com os dados corretos")
-    void getPeriodoValidById() throws Exception {
+    void getProfessorValidById() throws Exception {
         var user = testUtils.addUserOnRequest();
 
         var professorValid = new CreateProfessorRequest(
