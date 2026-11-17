@@ -1,6 +1,8 @@
 package com.alunos.scholl.domain.turma;
 
+import com.alunos.scholl.domain.professor.dto.request.PutProfessorRequest;
 import com.alunos.scholl.domain.turma.dto.request.CreateTurmaRequest;
+import com.alunos.scholl.domain.turma.dto.request.PutTurmaRequest;
 import com.alunos.scholl.domain.turma.dto.response.CreateTurmaResponse;
 import com.alunos.scholl.domain.turma.dto.response.SampleTurma;
 import com.alunos.scholl.domain.turma.service.TurmaService;
@@ -34,9 +36,10 @@ public class TurmaController {
     @Transactional(readOnly = true)
     public Page<SampleTurma> getMyTurmas(
             HttpServletRequest httpServletRequest,
+            @RequestParam(defaultValue = "", required = false) String nome,
             @RequestParam(defaultValue = "0", required = false) int pageNumber
     ) {
-        return turmaService.getMyTurmas(httpServletRequest, pageNumber);
+        return turmaService.getMyTurmas(httpServletRequest, nome, pageNumber);
     }
 
     @GetMapping("/{id}")
@@ -45,5 +48,14 @@ public class TurmaController {
             @PathVariable UUID id,
             HttpServletRequest request) {
         return turmaService.getTurmaById(id, request);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> putTurma(
+            @PathVariable UUID id,
+            @RequestBody PutTurmaRequest putProfessorRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        return turmaService.putTurma(putProfessorRequest, id, httpServletRequest);
     }
 }

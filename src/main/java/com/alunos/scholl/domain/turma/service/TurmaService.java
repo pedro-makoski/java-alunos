@@ -3,6 +3,7 @@ package com.alunos.scholl.domain.turma.service;
 import com.alunos.scholl.domain.materia.dto.response.MateriaSample;
 import com.alunos.scholl.domain.materia.repositories.MateriaRepository;
 import com.alunos.scholl.domain.turma.dto.request.CreateTurmaRequest;
+import com.alunos.scholl.domain.turma.dto.request.PutTurmaRequest;
 import com.alunos.scholl.domain.turma.dto.response.CreateTurmaResponse;
 import com.alunos.scholl.domain.turma.dto.response.SampleTurma;
 import com.alunos.scholl.domain.turma.exceptions.TurmaNotFound;
@@ -65,18 +66,20 @@ public class TurmaService {
 
     public Page<SampleTurma> getMyTurmas(
             HttpServletRequest httpServletRequest,
+            String term,
             int pageNumber
     ) {
         var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
         if(user.isTeacher()) {
             return turmaRepository
-                    .findByTeacherId(user.getProfessor().getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .findByTeacherIdAndNome(user.getProfessor().getId(), term, PageRequest.of(pageNumber, Constants.pageSize))
                     .map(SampleTurma::new);
         }
 
         return turmaRepository
-                .findAllByDonoId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                .findAllByDonoIdAndNomeContaining(user.getId(), term,
+                        PageRequest.of(pageNumber, Constants.pageSize))
                 .map(SampleTurma::new);
     }
 
@@ -93,5 +96,24 @@ public class TurmaService {
     private URI getUriOfTurma(Turma turma) {
         return URIGeneratorOfBaseAndId
                 .realize("/turma/{id}", turma.getId());
+    }
+
+    public ResponseEntity<?> putTurma(
+            @Valid PutTurmaRequest putTurmaRequest,
+            UUID idTurma,
+            HttpServletRequest httpServletRequest
+            ) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var turma = getTurma(idTurma, user);
+
+        turma.setNome(putTurmaRequest.nome());
+        turma.setTipo(putTurmaRequest.tipoTurma());
+        turma.setTamanhoMaximo(putTurmaRequest.tamanhoMaximo());
+
+        turmaRepository.save(turma);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }

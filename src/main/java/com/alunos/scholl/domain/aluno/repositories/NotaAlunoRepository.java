@@ -15,4 +15,6 @@ public interface NotaAlunoRepository extends JpaRepository<NotaAluno, NotaAlunoI
     void deleteByNotaAlunoIdAlunoId(UUID alunoId);
 
     void deleteByNotaAlunoIdMateriaId(UUID materiaId);
+
+    void deleteByNotaAlunoIdPeriodoId(UUID periodoId);
 }

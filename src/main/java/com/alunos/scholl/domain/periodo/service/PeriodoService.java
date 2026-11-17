@@ -1,11 +1,14 @@
 package com.alunos.scholl.domain.periodo.service;
 
+import com.alunos.scholl.domain.aluno.repositories.NotaAlunoRepository;
 import com.alunos.scholl.domain.periodo.dto.request.CreatePeriodoRequest;
+import com.alunos.scholl.domain.periodo.dto.request.PutPeriodoRequest;
 import com.alunos.scholl.domain.periodo.dto.response.CreatePeriodoResponse;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
 import com.alunos.scholl.domain.periodo.exceptions.PeriodoNotFound;
 import com.alunos.scholl.domain.periodo.model.Periodo;
 import com.alunos.scholl.domain.periodo.repositories.PeriodoRepository;
+import com.alunos.scholl.domain.periodo.repositories.TurmaPeriodoRepository;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
 import com.alunos.scholl.infra.Constants;
@@ -34,6 +37,12 @@ public class PeriodoService {
 
     @Autowired
     private PermissionValidationAndGet permissionValidationAndGet;
+
+    @Autowired
+    private NotaAlunoRepository notaAlunoRepository;
+
+    @Autowired
+    private TurmaPeriodoRepository turmaPeriodoRepository;
 
     public ResponseEntity<CreatePeriodoResponse>
         postPeriodo(@Valid CreatePeriodoRequest createPeriodoRequest,
@@ -64,7 +73,8 @@ public class PeriodoService {
                         .map(PeriodoSample::new);
             }
 
-            return periodoRepository.findByDonoId(user.getId(),
+            return periodoRepository.findByDonoIdOrderByFimDesc(user.getId(),
+
                     PageRequest.of(pageNumber, Constants.pageSize))
                     .map(PeriodoSample::new);
     }
@@ -78,5 +88,36 @@ public class PeriodoService {
 
     public Periodo getPeriodoById(UUID id, User user) {
         return permissionValidationAndGet.validateAndGetPeriodo(id, user);
+    }
+
+    public ResponseEntity<?> putPeriodo(
+            UUID periodoId,
+            @Valid PutPeriodoRequest putPeriodoRequest,
+            HttpServletRequest httpServletRequest) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var periodo = getPeriodoById(periodoId, user);
+
+        periodo.setInicio(putPeriodoRequest.inicio());
+        periodo.setFim(putPeriodoRequest.fim());
+        periodo.setTipo(putPeriodoRequest.tipoPeriodo());
+
+        periodoRepository.save(periodo);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
+    public ResponseEntity<?> deletePeriodoById(UUID idPeriodo, HttpServletRequest httpServletRequest) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var periodo = getPeriodoById(idPeriodo, user);
+
+        turmaPeriodoRepository.deleteByTurmaPeriodoIdPeriodoId(idPeriodo);
+        notaAlunoRepository.deleteByNotaAlunoIdPeriodoId(idPeriodo);
+        periodoRepository.deleteById(periodo.getId());
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 }
