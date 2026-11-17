@@ -20,7 +20,7 @@ public interface AlunoRepository extends JpaRepository<Aluno, UUID> {
         LEFT JOIN Materia m ON m.turma = at
             
         WHERE m.professor.id = :id
-        AND a.name LIKE '%:name%'
+                AND LOWER(a.nome) LIKE LOWER(CONCAT('%', :name, '%'))
     """)
     Page<Aluno> findByProfessorId(UUID id, String name, Pageable pageable);
 
