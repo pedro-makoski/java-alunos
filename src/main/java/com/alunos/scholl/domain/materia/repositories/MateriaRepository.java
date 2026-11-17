@@ -12,9 +12,10 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface MateriaRepository extends JpaRepository<Materia, UUID> {
-    Page<Materia> findByDonoId(UUID donoId, Pageable pageable);
+    Page<Materia> findByDonoIdAndNomeContaining(UUID donoId, String nome, Pageable pageable);
 
-    Page<Materia> findByProfessorId(UUID donoId, Pageable pageable);
+    Page<Materia> findByProfessorIdAndNomeContaining(UUID donoId, String nome,
+                                                     Pageable pageable);
 
     @Query("""
         SELECT m FROM Materia m

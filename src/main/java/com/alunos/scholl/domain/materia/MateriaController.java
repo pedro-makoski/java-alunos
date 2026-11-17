@@ -3,6 +3,7 @@ package com.alunos.scholl.domain.materia;
 import com.alunos.scholl.domain.aluno.dto.response.GridNotas;
 import com.alunos.scholl.domain.aluno.service.TurmaGradeNotasService;
 import com.alunos.scholl.domain.materia.dto.request.CreateMateriaRequest;
+import com.alunos.scholl.domain.materia.dto.request.PutMateriaRequest;
 import com.alunos.scholl.domain.materia.dto.response.CreateMateriaResponse;
 import com.alunos.scholl.domain.materia.dto.response.MateriaSample;
 import com.alunos.scholl.domain.materia.service.FindMyAlunosService;
@@ -48,9 +49,10 @@ public class MateriaController {
     @Transactional(readOnly = true)
     public Page<MateriaSample> getMyMaterias(
             HttpServletRequest httpServletRequest,
+            @RequestParam(defaultValue = "", required = false) String term,
             @RequestParam(defaultValue = "0", required = false) int pageNumber
     ) {
-        return materiaService.findMyMaterias(pageNumber, httpServletRequest);
+        return materiaService.findMyMaterias(pageNumber, term, httpServletRequest);
     }
 
     @GetMapping("/{id}")
@@ -113,5 +115,22 @@ public class MateriaController {
     ) {
         return periodoMateriaService
                 .addPeriodoInMateria(httpServletRequest, periodoId, materiaId);
+    }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> putMateria(
+            @RequestBody PutMateriaRequest content,
+            @PathVariable UUID id,
+            HttpServletRequest httpServletRequest
+    ) {
+        return materiaService.putMateriaById(content, id, httpServletRequest);
+    }
+
+    @DeleteMapping("/{id}")
+    public ResponseEntity<?> deleteMateria(
+            @PathVariable UUID id,
+            HttpServletRequest httpServletRequest
+    ) {
+        return materiaService.deleteMateriaById(id, httpServletRequest);
     }
 }

@@ -1,6 +1,8 @@
 package com.alunos.scholl.domain.materia.service;
 
+import com.alunos.scholl.domain.aluno.repositories.NotaAlunoRepository;
 import com.alunos.scholl.domain.materia.dto.request.CreateMateriaRequest;
+import com.alunos.scholl.domain.materia.dto.request.PutMateriaRequest;
 import com.alunos.scholl.domain.materia.dto.response.CreateMateriaResponse;
 import com.alunos.scholl.domain.materia.dto.response.MateriaSample;
 import com.alunos.scholl.domain.materia.exception.MateriaNotFound;
@@ -42,6 +44,9 @@ public class MateriaService {
 
     @Autowired
     private PermissionValidationAndGet permissionValidationAndGet;
+
+    @Autowired
+    private NotaAlunoRepository notaAlunoRepository;
 
     public ResponseEntity<CreateMateriaResponse> postMateria(
             @Valid CreateMateriaRequest createMateriaRequest,
@@ -90,18 +95,23 @@ public class MateriaService {
 
     public Page<MateriaSample> findMyMaterias(
             int pageNumber,
+            String term,
             HttpServletRequest httpServletRequest
     ) {
         var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
         if(user.isTeacher()) {
             materiaRepository
-                    .findByProfessorId(user.getProfessor().getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .findByProfessorIdAndNomeContaining(
+                            user.getProfessor().getId(),
+                            term,
+                            PageRequest.of(pageNumber, Constants.pageSize))
                     .map(MateriaSample::new);
         }
 
         return materiaRepository
-                .findByDonoId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                .findByDonoIdAndNomeContaining(user.getId(), term,
+                        PageRequest.of(pageNumber, Constants.pageSize))
                 .map(MateriaSample::new);
     }
 
@@ -112,6 +122,45 @@ public class MateriaService {
         var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
         return new MateriaSample(getByMateriaId(materiaId, user));
+    }
+
+    public ResponseEntity<?> putMateriaById(
+            @Valid PutMateriaRequest putMateriaRequest,
+            UUID idMateria,
+            HttpServletRequest httpServletRequest
+            ) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+
+        var materia = getByMateriaId(idMateria, user);
+
+        var turma = turmaService.getTurma(putMateriaRequest.turmaId(),
+                user);
+        var professor = professorService
+                .getProfessorById(putMateriaRequest.professorId(), user);
+
+        materia.setNome(putMateriaRequest.nome());
+        materia.setTurma(turma);
+        materia.setProfessor(professor);
+
+        materiaRepository.save(materia);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
+    public ResponseEntity<?> deleteMateriaById(
+            UUID idMateria,
+            HttpServletRequest httpServletRequest) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var materia = getByMateriaId(idMateria, user);
+
+        notaAlunoRepository.deleteByNotaAlunoIdMateriaId(materia.getId());
+        materiaRepository.deleteById(idMateria);
+
+        return ResponseEntity
+                .noContent()
+                .build();
     }
 
     public Materia getByMateriaId(
