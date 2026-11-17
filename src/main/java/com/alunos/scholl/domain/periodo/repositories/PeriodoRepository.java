@@ -11,7 +11,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface PeriodoRepository extends JpaRepository<Periodo, UUID> {
-    Page<Periodo> findByDonoId(UUID dono, Pageable pageable);
+    Page<Periodo> findByDonoIdOrderByFimDesc(UUID dono, Pageable pageable);
 
     @Query("""
         SELECT p FROM TurmaPeriodo tp
@@ -23,7 +23,7 @@ public interface PeriodoRepository extends JpaRepository<Periodo, UUID> {
         JOIN m.turma turma
             
         WHERE prof.id = :id
-            
+        ORDER BY p.fim desc    
     """)
     Page<Periodo> findByProfessorId(UUID id, PageRequest of);
 

@@ -11,14 +11,15 @@ import java.util.UUID;
 
 public interface TurmaRepository extends JpaRepository<Turma, UUID> {
 
-    Page<Turma> findAllByDonoId(UUID id, Pageable pageable);
+    Page<Turma> findAllByDonoIdAndNomeContaining(UUID id, String term, Pageable pageable);
 
     @Query("""
         SELECT DISTINCT t FROM Materia m
         JOIN m.turma t
         WHERE m.professor.id = :id
+        AND t.nome LIKE '%:nome%'
     """)
-    Page<Turma> findByTeacherId(UUID id, Pageable pageable);
+    Page<Turma> findByTeacherIdAndNome(UUID id, String nome, Pageable pageable);
 
     @Query("""
         SELECT DISTINCT t FROM Materia m

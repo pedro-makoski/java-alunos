@@ -1,6 +1,7 @@
 package com.alunos.scholl.domain.professor;
 
 import com.alunos.scholl.domain.professor.dto.request.CreateProfessorRequest;
+import com.alunos.scholl.domain.professor.dto.request.PutProfessorRequest;
 import com.alunos.scholl.domain.professor.dto.response.CreateProfessorResponse;
 import com.alunos.scholl.domain.professor.dto.response.SampleProfessor;
 import com.alunos.scholl.domain.professor.service.ProfessorService;
@@ -34,16 +35,28 @@ public class ProfessorController {
     @Transactional(readOnly = true)
     public Page<SampleProfessor> getMyProfessores(
             HttpServletRequest httpServletRequest,
+            @RequestParam(defaultValue = "", required = false) String term,
             @RequestParam(defaultValue = "0", required = false) int pageNumber
     ) {
-        return professorService.findMyProfessor(pageNumber, httpServletRequest);
+        return professorService.findMyProfessor(pageNumber, term, httpServletRequest);
     }
 
-    @GetMapping("/{id}")
-    @Transactional(readOnly = true)
-    public SampleProfessor getProfessorById(
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> deleteProfessor(
             @PathVariable UUID id,
-            HttpServletRequest request) {
-        return professorService.getProfessorById(id, request);
+            HttpServletRequest httpServletRequest
+    ) {
+        return professorService.deleteProfessor(id, httpServletRequest);
     }
+
+    @PutMapping("/{id}")
+    public ResponseEntity<?> putProfessor(
+            @PathVariable UUID id,
+            @RequestBody PutProfessorRequest putProfessorRequest,
+            HttpServletRequest httpServletRequest
+    ) {
+        return professorService.putProfessor(putProfessorRequest, id, httpServletRequest);
+    }
+
 }

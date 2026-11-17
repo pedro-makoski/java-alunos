@@ -1,10 +1,12 @@
 package com.alunos.scholl.domain.professor.service;
 
 import com.alunos.scholl.domain.professor.dto.request.CreateProfessorRequest;
+import com.alunos.scholl.domain.professor.dto.request.PutProfessorRequest;
 import com.alunos.scholl.domain.professor.dto.response.CreateProfessorResponse;
 import com.alunos.scholl.domain.professor.exceptions.ProfessorNotFoundException;
 import com.alunos.scholl.domain.professor.model.Professor;
 import com.alunos.scholl.domain.professor.repositories.ProfessorRepository;
+import com.alunos.scholl.domain.turma.repositories.TurmaRepository;
 import com.alunos.scholl.domain.user.dtos.request.CreateAccountRequest;
 import com.alunos.scholl.domain.professor.dto.response.SampleProfessor;
 import com.alunos.scholl.domain.user.model.User;
@@ -41,6 +43,9 @@ public class ProfessorService {
     @Autowired
     private GetUserOnRequest getUserOnRequest;
 
+    @Autowired
+    private TurmaRepository turmaRepository;
+
     public ResponseEntity<CreateProfessorResponse> createProfessor(
             @Valid CreateProfessorRequest createProfessorRequest,
             HttpServletRequest httpServletRequest
@@ -71,12 +76,13 @@ public class ProfessorService {
 
     public Page<SampleProfessor> findMyProfessor(
             int pageNumber,
+            String nome,
             HttpServletRequest httpServletRequest
     ) {
         var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
         return professorRepository
-                .findAllByDonoId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                .findAllByDonoIdAndUserRelated_NomeContaining(user.getId(), nome, PageRequest.of(pageNumber, Constants.pageSize))
                 .map(SampleProfessor::new);
     }
 
@@ -102,4 +108,46 @@ public class ProfessorService {
 
         return professor;
     }
+
+    public ResponseEntity<?> putProfessor(
+            @Valid PutProfessorRequest putProfessorRequest,
+            UUID idProfessor,
+            HttpServletRequest httpServletRequest
+    ) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var professor = getProfessorById(idProfessor, user);
+        var related = professor.getUserRelated();
+
+        related.setNome(putProfessorRequest.nome());
+        related.setSobrenome(putProfessorRequest.sobrenome());
+        related.setDataNascimento(putProfessorRequest.dataNascimento());
+
+        professorRepository.save(professor);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
+    public ResponseEntity<?> deleteProfessor(
+            UUID id,
+            HttpServletRequest httpServletRequest
+    ) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var professor = getProfessorById(id, user);
+
+        var turmasOfTeacher = turmaRepository.findByTeacherIdAndNome(id, "", PageRequest.of(0, 1))
+                .getTotalElements();
+
+        if(turmasOfTeacher != 0) {
+            throw new YouDontHavePermission();
+        }
+
+        professorRepository.deleteById(id);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
 }

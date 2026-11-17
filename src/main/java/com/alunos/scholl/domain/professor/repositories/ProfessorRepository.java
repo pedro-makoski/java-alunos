@@ -10,5 +10,6 @@ import java.util.UUID;
 
 public interface ProfessorRepository extends JpaRepository<Professor, UUID> {
 
-    Page<Professor> findAllByDonoId(UUID id, Pageable pageable);
+    Page<Professor> findAllByDonoIdAndUserRelated_NomeContaining(UUID id, String nome,
+                                                                     Pageable pageable);
 }

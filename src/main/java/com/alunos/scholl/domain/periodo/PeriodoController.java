@@ -1,6 +1,7 @@
 package com.alunos.scholl.domain.periodo;
 
 import com.alunos.scholl.domain.periodo.dto.request.CreatePeriodoRequest;
+import com.alunos.scholl.domain.periodo.dto.request.PutPeriodoRequest;
 import com.alunos.scholl.domain.periodo.dto.response.CreatePeriodoResponse;
 import com.alunos.scholl.domain.periodo.dto.response.PeriodoSample;
 import com.alunos.scholl.domain.periodo.service.PeriodoService;
@@ -10,6 +11,7 @@ import jakarta.servlet.http.HttpServletRequest;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.data.domain.Page;
 import org.springframework.http.ResponseEntity;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.*;
 
 import java.util.UUID;
@@ -25,6 +27,7 @@ public class PeriodoController {
     private TurmaPeriodoService turmaPeriodoService;
 
     @PostMapping("/create")
+    @Transactional
     public ResponseEntity<CreatePeriodoResponse> create(
             @RequestBody CreatePeriodoRequest createPeriodoRequest,
             HttpServletRequest httpServletRequest
@@ -33,6 +36,7 @@ public class PeriodoController {
     }
 
     @GetMapping
+    @Transactional(readOnly = true)
     public Page<PeriodoSample> getMyPeriodos(
             HttpServletRequest httpServletRequest,
             @RequestParam(defaultValue = "0", required = false) int pageNumber
@@ -41,6 +45,7 @@ public class PeriodoController {
     }
 
     @GetMapping("/{id}")
+    @Transactional(readOnly = true)
     public PeriodoSample getPeriodoById(
             @PathVariable UUID id,
             HttpServletRequest request) {
@@ -48,6 +53,7 @@ public class PeriodoController {
     }
 
     @PatchMapping("/add-turma-in-periodo/{periodoId}")
+    @Transactional
     public ResponseEntity<?> addTurmaInPeriodo(
             HttpServletRequest httpServletRequest,
             @RequestParam UUID turmaId,
@@ -56,4 +62,22 @@ public class PeriodoController {
         return turmaPeriodoService.addTurmaInPeriodo(httpServletRequest, turmaId, periodoId);
     }
 
+    @DeleteMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> deletePeriodo(
+            @PathVariable UUID id,
+            HttpServletRequest httpServletRequest
+    ) {
+        return periodoService.deletePeriodoById(id, httpServletRequest);
+    }
+
+    @PutMapping("/{id}")
+    @Transactional
+    public ResponseEntity<?> putPeriodo(
+            @RequestBody PutPeriodoRequest putPeriodoRequest,
+            @PathVariable UUID id,
+            HttpServletRequest httpServletRequest
+            ) {
+           return periodoService.putPeriodo(id, putPeriodoRequest, httpServletRequest);
+    }
 }
