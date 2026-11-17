@@ -12,7 +12,7 @@ import java.util.Optional;
 import java.util.UUID;
 
 public interface AlunoRepository extends JpaRepository<Aluno, UUID> {
-    Page<Aluno> findByDonoId(UUID dono, Pageable pageable);
+    Page<Aluno> findByDonoIdAndNomeContaining(UUID dono, String nome, Pageable pageable);
 
     @Query("""
         SELECT DISTINCT a FROM Aluno a
@@ -20,8 +20,9 @@ public interface AlunoRepository extends JpaRepository<Aluno, UUID> {
         LEFT JOIN Materia m ON m.turma = at
             
         WHERE m.professor.id = :id
+        AND a.name LIKE '%:name%'
     """)
-    Page<Aluno> findByProfessorId(UUID id, Pageable pageable);
+    Page<Aluno> findByProfessorId(UUID id, String name, Pageable pageable);
 
     @Query("""
         SELECT DISTINCT a FROM Aluno a

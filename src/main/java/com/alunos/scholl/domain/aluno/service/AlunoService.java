@@ -1,11 +1,13 @@
 package com.alunos.scholl.domain.aluno.service;
 
 import com.alunos.scholl.domain.aluno.dto.request.CreateAlunoRequest;
+import com.alunos.scholl.domain.aluno.dto.request.PutAlunoRequest;
 import com.alunos.scholl.domain.aluno.dto.response.AlunoSample;
 import com.alunos.scholl.domain.aluno.dto.response.CreateAlunoResponse;
 import com.alunos.scholl.domain.aluno.exceptions.AlunoNotFound;
 import com.alunos.scholl.domain.aluno.model.Aluno;
 import com.alunos.scholl.domain.aluno.repositories.AlunoRepository;
+import com.alunos.scholl.domain.aluno.repositories.NotaAlunoRepository;
 import com.alunos.scholl.domain.turma.service.TurmaService;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.service.GetUserOnRequest;
@@ -39,6 +41,9 @@ public class AlunoService {
     @Autowired
     private PermissionValidationAndGet permissionValidationAndGet;
 
+    @Autowired
+    private NotaAlunoRepository notaAlunoRepository;
+
     public ResponseEntity<CreateAlunoResponse> postAluno
             (@Valid CreateAlunoRequest createAlunoRequest,
              HttpServletRequest httpServletRequest) {
@@ -61,17 +66,22 @@ public class AlunoService {
                 .body(new CreateAlunoResponse(response.getId()));
     }
 
-    public Page<AlunoSample> getAlunos(int pageNumber, HttpServletRequest httpServletRequest) {
+    public Page<AlunoSample> getAlunos(int pageNumber,
+                                       String nameAlunoBase,
+                                       HttpServletRequest httpServletRequest) {
         var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
 
         if(user.isTeacher()) {
             return alunoRepository
-                    .findByProfessorId(user.getProfessor().getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .findByProfessorId(user.getProfessor().getId(),
+                            nameAlunoBase,
+                            PageRequest.of(pageNumber, Constants.pageSize))
                     .map(AlunoSample::new);
         }
 
         return alunoRepository
-                    .findByDonoId(user.getId(), PageRequest.of(pageNumber, Constants.pageSize))
+                    .findByDonoIdAndNomeContaining(user.getId(), nameAlunoBase,
+                            PageRequest.of(pageNumber, Constants.pageSize))
                     .map(AlunoSample::new);
     }
 
@@ -93,6 +103,38 @@ public class AlunoService {
         aluno.setTurma(turma);
 
         alunoRepository.save(aluno);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
+    public ResponseEntity<?> putAluno(@Valid PutAlunoRequest putAlunoRequest,
+                                      UUID alunoId,
+                                      HttpServletRequest httpServletRequest) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+
+        var aluno = getAlunoById(alunoId, user);
+
+        aluno.setNome(putAlunoRequest.nome());
+        aluno.setDataNascimento(putAlunoRequest.dataNascimento());
+        aluno.setNomePai(putAlunoRequest.nomePai());
+        aluno.setNomeMae(putAlunoRequest.nomeMae());
+
+        alunoRepository.save(aluno);
+
+        return ResponseEntity
+                .noContent()
+                .build();
+    }
+
+    public ResponseEntity<?> deleteAluno(UUID alunoId,
+                                         HttpServletRequest httpServletRequest) {
+        var user = getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var aluno = getAlunoById(alunoId, user);
+
+        notaAlunoRepository.deleteByNotaAlunoIdAlunoId(alunoId);
+        alunoRepository.deleteById(aluno.getId());
 
         return ResponseEntity
                 .noContent()
