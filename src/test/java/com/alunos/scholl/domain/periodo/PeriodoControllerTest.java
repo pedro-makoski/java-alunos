@@ -274,8 +274,6 @@ class PeriodoControllerTest {
                         MockMvcRequestBuilders.get("/periodo"))
                 .andReturn().getResponse();
 
-        System.out.println(periodoResponse);
-
         var response = pageMockJacksonTesterOfPeriodo
                 .parseObject(periodoResponse.getContentAsString());
 
