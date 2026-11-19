@@ -4,9 +4,10 @@ import com.alunos.scholl.domain.user.model.User;
 
 public record MeResponse(
         String nome,
-        String sobrenome
+        String sobrenome,
+        Boolean isTeacher
 ) {
     public MeResponse(User user) {
-        this(user.getNome(), user.getSobrenome());
+        this(user.getNome(), user.getSobrenome(), user.isTeacher());
     }
 }

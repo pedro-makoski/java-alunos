@@ -67,10 +67,11 @@ Retorna os dados principais do usuário para verificar se está logado.
 
 **Resposta:**
 
-| Campo       | Tipo   | Descrição            |
-|-------------|--------|----------------------|
-| `nome`      | string | Nome do usuário      |
-| `sobrenome` | string | Sobrenome do usuário |
+| Campo       | Tipo     | Descrição                     |
+|-------------|----------|-------------------------------|
+| `nome`      | string   | Nome do usuário               |
+| `sobrenome` | string   | Sobrenome do usuário          |
+| `isTeacher` | boolean  | Informa se é professor ou não |
 
 
 #### `POST /user/login`
