@@ -38,7 +38,7 @@ public class GlobalExceptionHandler {
 
         return ResponseEntity
                 .badRequest()
-                .body(new InvalidExceptionDto(campos));
+                .body(new InvalidExceptionDto("Valores inválidos", campos));
     }
 
     @ExceptionHandler(NotFoundException.class)
