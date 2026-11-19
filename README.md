@@ -31,6 +31,21 @@ Esse projeto não tem o comprotimento de escalar para um caso real. Portanto, el
 ## Requisitos para rodar o sistema
 - Apenas o Docker
 - Atualmente só foi testado no sistema operacional Ubuntu, porém dificilmente não funcionará em outros
+- Adicionar .env com as chaves necessárias:
+
+```.env
+SPRING_PROFILES_ACTIVE=dev
+POSTGRES_DB=java-alunos
+POSTGRES_TEST_DB=java_alunos_db
+POSTGRES_USER=nome_do_usuario
+POSTGRES_PASSWORD=senha do banco
+POSTGRES_PORT=8000
+
+JWT_SECRET=Secret do JWT
+
+SERVER_PORT=8080
+SPRING_PROFILES_ACTIVE=prod
+```
 
 ## Rotas do Sistema
 
