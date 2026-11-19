@@ -52,8 +52,6 @@ public class AlunoOverviewService {
                 .average()
                 .orElse(0.0);
 
-        System.out.println(media);
-
         Map<String, Double> notasRelation = notas
                 .stream()
                 .collect(Collectors.toMap(
