@@ -113,9 +113,9 @@ public class AlunoController {
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<?> deleteAluno(
-            @PathVariable UUID idAluno,
+            @PathVariable UUID id,
             HttpServletRequest httpServletRequest
     ) {
-        return alunoService.deleteAluno(idAluno, httpServletRequest);
+        return alunoService.deleteAluno(id, httpServletRequest);
     }
 }
