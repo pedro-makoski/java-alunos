@@ -3,11 +3,13 @@ package com.alunos.scholl.domain.user.service;
 import com.alunos.scholl.domain.user.dtos.request.CreateAccountRequest;
 import com.alunos.scholl.domain.user.dtos.request.LoginRequest;
 import com.alunos.scholl.domain.user.dtos.response.LoginResponse;
+import com.alunos.scholl.domain.user.dtos.response.MeResponse;
 import com.alunos.scholl.domain.user.exceptions.EmailAlreadyUsed;
 import com.alunos.scholl.domain.user.exceptions.UserException;
 import com.alunos.scholl.domain.user.model.User;
 import com.alunos.scholl.domain.user.repositories.UserRepository;
 import com.alunos.scholl.infra.security.TokenService;
+import jakarta.servlet.http.HttpServletRequest;
 import jakarta.validation.Valid;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.http.HttpHeaders;
@@ -34,6 +36,9 @@ public class LoginService {
 
     @Autowired
     private PasswordEncoder passwordEncoder;
+
+    @Autowired
+    private GetUserOnRequest getUserOnRequest;
 
     public ResponseEntity<LoginResponse> doLogin(@Valid LoginRequest loginRequest) {
         var user = userRepository.findByEmail(loginRequest.email())
@@ -90,5 +95,9 @@ public class LoginService {
         return ResponseEntity.ok()
                 .header(HttpHeaders.SET_COOKIE, responseCookie.toString())
                 .body(new LoginResponse("Usuário logado", user.getId()));
+    }
+
+    public MeResponse me(HttpServletRequest httpServletRequest) {
+        return new MeResponse(getUserOnRequest.realizeWithThrow(httpServletRequest));
     }
 }

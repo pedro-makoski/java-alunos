@@ -26,7 +26,7 @@ public class SecurityConfiguration {
         return http.csrf(AbstractHttpConfigurer::disable)
                 .sessionManagement(s -> s.sessionCreationPolicy(SessionCreationPolicy.STATELESS))
                 .authorizeHttpRequests(s ->
-                    s.requestMatchers("/user/login",
+                    s.requestMatchers("/user/login", "/user/me",
                                     "/user/create-account", "/v3/api-docs/**",
                                     "/swagger-ui.html", "/swagger-ui/**")
                             .permitAll()

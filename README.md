@@ -47,6 +47,17 @@ Esta seção documenta todos os endpoints da API **Java Scholls**, agrupados por
 
 ### Usuário (`user-controller`)
 
+### `GET /user/me`
+Retorna os dados principais do usuário para verificar se está logado.
+
+**Resposta:**
+
+| Campo       | Tipo   | Descrição            |
+|-------------|--------|----------------------|
+| `nome`      | string | Nome do usuário      |
+| `sobrenome` | string | Sobrenome do usuário |
+
+
 #### `POST /user/login`
 Autentica um usuário.
 
