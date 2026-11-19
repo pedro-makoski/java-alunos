@@ -270,8 +270,6 @@ class TurmaControllerTest {
                         MockMvcRequestBuilders.get("/turma"))
                 .andReturn().getResponse();
 
-        System.out.println(turmaResponse.getContentAsString()+" -- azuç");
-
         var response = listOfTurmaJacksonTester
                 .parseObject(turmaResponse.getContentAsString());
 
