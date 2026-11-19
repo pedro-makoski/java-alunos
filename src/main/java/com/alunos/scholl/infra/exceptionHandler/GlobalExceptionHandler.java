@@ -2,6 +2,7 @@ package com.alunos.scholl.infra.exceptionHandler;
 
 import com.alunos.scholl.domain.user.exceptions.EmailAlreadyUsed;
 import com.alunos.scholl.domain.user.exceptions.UserException;
+import com.alunos.scholl.domain.user.exceptions.UserNotLogged;
 import com.alunos.scholl.infra.exceptions.NotFoundException;
 import com.alunos.scholl.infra.exceptions.YouDontHavePermission;
 import jakarta.validation.ConstraintViolationException;
@@ -133,5 +134,12 @@ public class GlobalExceptionHandler {
                 .body(new ExceptionDto(
                         String.format("O campo %s não pode ser nulo", ex.getParameterName())
                 ));
+    }
+
+    @ExceptionHandler(UserNotLogged.class)
+    public ResponseEntity<ExceptionDto> userNotLogged() {
+        return ResponseEntity
+                .status(HttpStatus.UNAUTHORIZED)
+                .body(new ExceptionDto("Usuário não logado"));
     }
 }
