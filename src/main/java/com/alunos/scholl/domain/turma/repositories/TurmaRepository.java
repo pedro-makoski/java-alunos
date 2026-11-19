@@ -17,7 +17,7 @@ public interface TurmaRepository extends JpaRepository<Turma, UUID> {
         SELECT DISTINCT t FROM Materia m
         JOIN m.turma t
         WHERE m.professor.id = :id
-        AND LOWER(t.nome) LIKE LOWER(CONCAT('%', :name, '%'))
+        AND LOWER(t.nome) LIKE LOWER(CONCAT('%', :nome, '%'))
     """)
     Page<Turma> findByTeacherIdAndNome(UUID id, String nome, Pageable pageable);
 

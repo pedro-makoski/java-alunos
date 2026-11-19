@@ -41,6 +41,16 @@ public class ProfessorController {
         return professorService.findMyProfessor(pageNumber, term, httpServletRequest);
     }
 
+    @GetMapping("/{id}")
+    @Transactional
+    public SampleProfessor getProfessor(
+            @PathVariable UUID id,
+            HttpServletRequest httpServletRequest
+    ) {
+        return professorService.getProfessorById(id, httpServletRequest);
+    }
+
+
     @DeleteMapping("/{id}")
     @Transactional
     public ResponseEntity<?> deleteProfessor(
