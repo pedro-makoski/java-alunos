@@ -54,8 +54,10 @@ public class AlunoNotasService {
         var finalUser = user.isTeacher() ?
                 user.getProfessor().getDono() : user;
 
-        var aluno = alunoService.getAlunoById(addNotaRequest.idAluno(), finalUser);
-        var periodo = periodoService.getPeriodoById(addNotaRequest.idPeriodo(), finalUser);
+        var aluno = permissionValidationAndGet.validateAndGetAluno
+                (addNotaRequest.idAluno(), finalUser);
+        var periodo = permissionValidationAndGet
+                .validateAndGetPeriodo(addNotaRequest.idPeriodo(), finalUser);
 
         var materia = permissionValidationAndGet.validateAndGetMateria(addNotaRequest.materiaId(), user);
 
@@ -89,8 +91,10 @@ public class AlunoNotasService {
         var finalUser = user.isTeacher() ?
                 user.getProfessor().getDono() : user;
 
-        var aluno = alunoService.getAlunoById(idAluno, finalUser);
-        var periodo = periodoService.getPeriodoById(idPeriodo, finalUser);
+        var aluno = permissionValidationAndGet.validateAndGetAluno
+                (idAluno, finalUser);
+        var periodo = permissionValidationAndGet
+                .validateAndGetPeriodo(idPeriodo, finalUser);
 
         var materia = permissionValidationAndGet.validateAndGetMateria(idMateria, user);
 

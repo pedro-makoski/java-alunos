@@ -45,6 +45,7 @@ public class TurmaGradeNotasService {
             HttpServletRequest httpServletRequest
     ) {
         var user =  getUserOnRequest.realizeWithThrow(httpServletRequest);
+        var periodo = permissionValidationAndGet.validateAndGetPeriodo(periodoId, user);
 
         var materia = permissionValidationAndGet.validateAndGetMateria(materiaId, user);
 
