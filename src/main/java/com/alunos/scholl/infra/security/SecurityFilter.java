@@ -13,9 +13,17 @@ import org.springframework.stereotype.Component;
 import org.springframework.web.filter.OncePerRequestFilter;
 
 import java.io.IOException;
+import java.util.List;
 
 @Component
 public class SecurityFilter extends OncePerRequestFilter {
+    private static final List<String> PUBLIC_PATHS = List.of(
+            "/user/login",
+            "/user/create-account",
+            "/v3/api-docs",
+            "/swagger-ui"
+    );
+
     @Autowired
     private TokenService tokenService;
 
@@ -37,5 +45,11 @@ public class SecurityFilter extends OncePerRequestFilter {
         });
 
         filterChain.doFilter(request, response);
+    }
+
+    @Override
+    protected boolean shouldNotFilter(HttpServletRequest request) {
+        String path = request.getServletPath();
+        return PUBLIC_PATHS.stream().anyMatch(path::startsWith);
     }
 }
