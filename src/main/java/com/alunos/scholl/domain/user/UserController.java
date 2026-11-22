@@ -42,6 +42,7 @@ public class UserController {
     }
 
     @GetMapping("/me")
+    @Transactional(readOnly = true)
     public MeResponse me(HttpServletRequest httpServletRequest) {
         return loginService.me(httpServletRequest);
     }

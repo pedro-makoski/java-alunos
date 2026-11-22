@@ -143,6 +143,7 @@ public class ProfessorService {
             throw new YouDontHavePermission();
         }
 
+        userRepository.delete(professor.getUserRelated());
         professorRepository.deleteById(id);
 
         return ResponseEntity

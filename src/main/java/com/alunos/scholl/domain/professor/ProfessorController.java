@@ -61,6 +61,7 @@ public class ProfessorController {
     }
 
     @PutMapping("/{id}")
+    @Transactional
     public ResponseEntity<?> putProfessor(
             @PathVariable UUID id,
             @RequestBody PutProfessorRequest putProfessorRequest,
